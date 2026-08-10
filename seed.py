@@ -6,7 +6,7 @@ Usage:
 
 import os
 import sys
-from datetime import datetime
+
 
 # Ensure the project root is on the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app import create_app
 from app.models.user import User
 from app.models.platform import set_handle
-from app.models.content import create_tutorial, create_online_contest
+from app.models.content import create_tutorial
 
 
 def init_db():
@@ -96,41 +96,7 @@ def init_db():
                 )
             print("[Seed] Sample tutorials added.")
 
-        # Seed sample online contests
-        from app.models.content import get_online_contests
-        if not get_online_contests():
-            contests = [
-                ('2026 ICPC Asia Regional Contest', 'codeforces',
-                 'https://codeforces.com/contests', datetime(2026, 12, 15, 10, 0), datetime(2026, 12, 15, 15, 0),
-                 'ICPC亚洲区域赛在线同步赛。'),
-                ('Codeforces Round #1020 (Div. 2)', 'codeforces',
-                 'https://codeforces.com/contests', datetime(2026, 8, 16, 14, 35), datetime(2026, 8, 16, 16, 35),
-                 'Codeforces常规Div.2比赛。'),
-                ('Codeforces Round #1021 (Div. 1 + Div. 2)', 'codeforces',
-                 'https://codeforces.com/contests', datetime(2026, 8, 22, 14, 35), datetime(2026, 8, 22, 17, 5),
-                 '联合Div.1+Div.2，题目质量高。'),
-                ('AtCoder Beginner Contest 380', 'atcoder',
-                 'https://atcoder.jp/contests', datetime(2026, 8, 17, 19, 0), datetime(2026, 8, 17, 20, 40),
-                 'ABC系列，适合新手到进阶。'),
-                ('AtCoder Regular Contest 175', 'atcoder',
-                 'https://atcoder.jp/contests', datetime(2026, 8, 24, 20, 0), datetime(2026, 8, 24, 22, 0),
-                 'ARC系列，难度较高。'),
-                ('牛客练习赛150', 'nowcoder',
-                 'https://ac.nowcoder.com/acm/contest/discuss', datetime(2026, 8, 15, 19, 0), datetime(2026, 8, 15, 21, 0),
-                 '牛客平台常规练习赛。'),
-                ('牛客寒假算法训练营', 'nowcoder',
-                 'https://ac.nowcoder.com/acm/contest/discuss', datetime(2026, 12, 20, 9, 0), datetime(2026, 12, 25, 18, 0),
-                 '为期一周的寒假集训营。'),
-                ('洛谷月赛 2026年8月', 'luogu',
-                 'https://www.luogu.com.cn/contest/list', datetime(2026, 8, 20, 14, 0), datetime(2026, 8, 20, 18, 0),
-                 '洛谷每月一度的公开赛。'),
-                ('洛谷月赛 2026年9月', 'luogu',
-                 'https://www.luogu.com.cn/contest/list', datetime(2026, 9, 15, 14, 0), datetime(2026, 9, 15, 18, 0),
-                 '洛谷九月公开赛，四道题。'),
-            ]
-            for c in contests:
-                create_online_contest(*c, posted_by=admin_id)
-            print(f"[Seed] {len(contests)} sample online contests added.")
+        # Online contests are auto-scraped daily — no seed needed
 
         print("[Seed] Database initialization complete!")
 
