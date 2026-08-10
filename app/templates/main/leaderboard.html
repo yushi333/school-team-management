@@ -2,36 +2,49 @@
 {% block title %}排行榜 - ACM校队管理系统{% endblock %}
 
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-trophy"></i> 排行榜</h3>
+<div class="page-header">
+    <h3><i class="bi bi-trophy me-2"></i>排行榜</h3>
+</div>
 
 {% if rankings %}
-<table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>排名</th>
-            <th>姓名</th>
-            <th>年级</th>
-            <th>总题量</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in rankings %}
-        <tr>
-            <td>
-                {% if r.rank <= 3 %}
-                <span class="badge bg-{{ ['warning','secondary','info'][r.rank-1] }} fs-5">#{{ r.rank }}</span>
-                {% else %}
-                {{ r.rank }}
-                {% endif %}
-            </td>
-            <td>{{ r.real_name or r.username }}</td>
-            <td>{{ r.grade or '-' }}</td>
-            <td><strong>{{ r.total_solved }}</strong></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-striped align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">排名</th>
+                    <th>姓名</th>
+                    <th>年级</th>
+                    <th class="text-end pe-4">总题量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rankings %}
+                <tr>
+                    <td class="ps-4">
+                        {% if r.rank == 1 %}
+                        <span class="badge bg-warning fs-6">🥇 #1</span>
+                        {% elif r.rank == 2 %}
+                        <span class="badge bg-secondary fs-6">🥈 #2</span>
+                        {% elif r.rank == 3 %}
+                        <span class="badge bg-info fs-6">🥉 #3</span>
+                        {% else %}
+                        <span class="text-muted fw-bold">{{ r.rank }}</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ r.real_name or r.username }}</strong></td>
+                    <td>{{ r.grade or '-' }}</td>
+                    <td class="text-end pe-4"><span class="fw-bold fs-5 text-primary">{{ r.total_solved }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% else %}
-<p class="text-muted">暂无排行数据。</p>
+<div class="text-center py-5">
+    <i class="bi bi-trophy display-1 text-muted"></i>
+    <p class="text-muted mt-3">暂无排行数据，请先设置平台账号。</p>
+</div>
 {% endif %}
 {% endblock %}

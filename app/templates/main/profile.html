@@ -5,20 +5,22 @@
 {% endblock %}
 
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-person"></i> 个人信息</h3>
+<div class="page-header">
+    <h3><i class="bi bi-person me-2"></i>个人信息</h3>
+</div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>基本信息</span>
-                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-primary">编辑</a>
+                <span><i class="bi bi-person-badge me-2"></i>基本信息</span>
+                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>编辑</a>
             </div>
             <div class="card-body">
-                <table class="table table-sm">
-                    <tr><td class="text-muted" width="100">用户名</td><td>{{ current_user.username }}</td></tr>
-                    <tr><td class="text-muted">姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
-                    <tr><td class="text-muted">年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted" width="100"><i class="bi bi-person me-2"></i>用户名</td><td><strong>{{ current_user.username }}</strong></td></tr>
+                    <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
+                    <tr><td class="text-muted"><i class="bi bi-mortarboard me-2"></i>年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
                 </table>
             </div>
         </div>
@@ -26,60 +28,61 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>平台账号</span>
-                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-primary">编辑</a>
+                <span><i class="bi bi-link-45deg me-2"></i>平台账号</span>
+                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>编辑</a>
             </div>
             <div class="card-body">
-                <table class="table table-sm">
-                    <tr><td class="text-muted">洛谷</td><td>{{ handles.get('luogu', '-') }}</td></tr>
-                    <tr><td class="text-muted">牛客</td><td>{{ handles.get('nowcoder', '-') }}</td></tr>
-                    <tr><td class="text-muted">AtCoder</td><td>{{ handles.get('atcoder', '-') }}</td></tr>
-                    <tr><td class="text-muted">Codeforces</td><td>{{ handles.get('codeforces', '-') }}</td></tr>
-                    <tr><td class="text-muted">力扣</td><td>{{ handles.get('leetcode', '-') }}</td></tr>
-                    <tr><td class="text-muted">蓝桥杯</td><td>{{ handles.get('lanqiao', '-') }}</td></tr>
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted"><span class="badge badge-luogu me-2">●</span>洛谷</td><td>{{ handles.get('luogu', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-nowcoder me-2">●</span>牛客</td><td>{{ handles.get('nowcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-atcoder me-2">●</span>AtCoder</td><td>{{ handles.get('atcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-codeforces me-2">●</span>Codeforces</td><td>{{ handles.get('codeforces', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-leetcode me-2">●</span>力扣</td><td>{{ handles.get('leetcode', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-lanqiao me-2">●</span>蓝桥杯</td><td>{{ handles.get('lanqiao', '-') }}</td></tr>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Platform Stats -->
 <div class="card mb-4">
-    <div class="card-header">刷题数据</div>
-    <div class="card-body">
+    <div class="card-header"><i class="bi bi-bar-chart me-2"></i>刷题数据</div>
+    <div class="card-body p-0">
         {% if scrape_results %}
-        <table class="table table-striped">
+        <table class="table table-striped mb-0">
             <thead>
                 <tr>
-                    <th>平台</th>
+                    <th class="ps-4">平台</th>
                     <th>已解决</th>
                     <th>评分</th>
-                    <th>最后更新</th>
+                    <th class="pe-4">最后更新</th>
                 </tr>
             </thead>
             <tbody>
                 {% for r in scrape_results %}
                 <tr>
-                    <td><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(r.platform, r.platform) }}</span></td>
-                    <td><strong>{{ r.total_solved }}</strong></td>
+                    <td class="ps-4"><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(r.platform, r.platform) }}</span></td>
+                    <td><strong class="fs-5">{{ r.total_solved }}</strong></td>
                     <td>{{ r.rating or '-' }}</td>
-                    <td>{{ r.scraped_at[:16] if r.scraped_at else '-' }}</td>
+                    <td class="pe-4"><small class="text-muted">{{ r.scraped_at[:16] if r.scraped_at else '-' }}</small></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <p class="text-muted">暂无刷题数据。请先在编辑资料中设置平台账号，系统将定时自动更新数据。</p>
+        <div class="text-center py-4">
+            <i class="bi bi-inbox display-4 text-muted"></i>
+            <p class="text-muted mt-2">暂无刷题数据。请先在编辑资料中设置平台账号，系统将定时自动更新数据。</p>
+        </div>
         {% endif %}
     </div>
 </div>
 
-<!-- Charts -->
 {% if platform_data and platform_data|sum > 0 %}
 <div class="row g-3">
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header">各平台题量占比</div>
+            <div class="card-header"><i class="bi bi-pie-chart me-2"></i>各平台题量占比</div>
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="platformPieChart"></canvas>
@@ -90,7 +93,7 @@
     {% if all_categories %}
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header">做题风格分布</div>
+            <div class="card-header"><i class="bi bi-bar-chart-steps me-2"></i>做题风格分布</div>
             <div class="card-body">
                 <div class="chart-container-wide">
                     <canvas id="categoryBarChart"></canvas>
@@ -106,7 +109,6 @@
 {% block extra_scripts %}
 {% if platform_data and platform_data|sum > 0 %}
 <script>
-// Platform pie chart
 const pieCtx = document.getElementById('platformPieChart').getContext('2d');
 new Chart(pieCtx, {
     type: 'doughnut',
@@ -114,40 +116,39 @@ new Chart(pieCtx, {
         labels: {{ platform_labels|tojson }},
         datasets: [{
             data: {{ platform_data|tojson }},
-            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#e67e22', '#f39c12', '#9b59b6'],
+            backgroundColor: ['#3498db','#e74c3c','#2ecc71','#e67e22','#f39c12','#9b59b6'],
+            borderWidth: 2,
+            borderColor: '#fff',
         }]
     },
     options: {
         responsive: true,
         plugins: {
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
         }
     }
 });
 
 {% if all_categories %}
-// Category bar chart
 const barCtx = document.getElementById('categoryBarChart').getContext('2d');
 const catData = {{ all_categories|tojson }};
-const catLabels = Object.keys(catData);
-const catValues = Object.values(catData);
 new Chart(barCtx, {
     type: 'bar',
     data: {
-        labels: catLabels,
+        labels: Object.keys(catData),
         datasets: [{
             label: '题量',
-            data: catValues,
-            backgroundColor: '#4472C4',
+            data: Object.values(catData),
+            backgroundColor: ['#4472C4','#ED7D31','#A5A5A5','#FFC000','#5B9BD5','#70AD47','#264478','#9B59B6','#E74C3C','#1ABC9C'],
+            borderRadius: 6,
         }]
     },
     options: {
         responsive: true,
-        plugins: {
-            legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true, title: { display: true, text: '题量' } }
+            y: { beginAtZero: true, title: { display: true, text: '题量' }, grid: { color: '#f1f5f9' } },
+            x: { grid: { display: false } }
         }
     }
 });

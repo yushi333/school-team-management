@@ -10,10 +10,10 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="bi bi-people-fill"></i> ACM校队管理系统
+                <i class="bi bi-code-slash me-1"></i> ACM校队
             </a>
             {% if current_user.is_authenticated %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -22,43 +22,43 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-speedometer2"></i> 首页</a>
+                        <a class="nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-speedometer2 me-1"></i>首页</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.profile') }}"><i class="bi bi-person"></i> 个人信息</a>
+                        <a class="nav-link" href="{{ url_for('main.profile') }}"><i class="bi bi-person me-1"></i>个人信息</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.leaderboard') }}"><i class="bi bi-trophy"></i> 排行榜</a>
+                        <a class="nav-link" href="{{ url_for('main.leaderboard') }}"><i class="bi bi-trophy me-1"></i>排行榜</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.tutorials') }}"><i class="bi bi-play-circle"></i> 教学板块</a>
+                        <a class="nav-link" href="{{ url_for('main.tutorials') }}"><i class="bi bi-play-circle me-1"></i>教学</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-calendar-event"></i> 比赛
+                            <i class="bi bi-calendar-event me-1"></i>比赛
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('main.online_contests') }}"><i class="bi bi-globe"></i> 线上比赛</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.campus_events') }}"><i class="bi bi-building"></i> 校内活动</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.awards') }}"><i class="bi bi-trophy"></i> 获奖材料</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.online_contests') }}"><i class="bi bi-globe me-2"></i>线上比赛</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.campus_events') }}"><i class="bi bi-building me-2"></i>校内活动</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.awards') }}"><i class="bi bi-trophy me-2"></i>获奖材料</a></li>
                         </ul>
                     </li>
                     {% if current_user.is_admin() %}
                     <li class="nav-item">
-                        <a class="nav-link text-warning" href="{{ url_for('admin.index') }}"><i class="bi bi-gear"></i> 管理后台</a>
+                        <a class="nav-link text-warning-emphasis" href="{{ url_for('admin.index') }}"><i class="bi bi-gear me-1"></i>管理后台</a>
                     </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ current_user.real_name or current_user.username }}
+                            <i class="bi bi-person-circle me-1"></i>{{ current_user.real_name or current_user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">编辑资料</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">修改密码</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}"><i class="bi bi-pencil me-2"></i>编辑资料</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}"><i class="bi bi-key me-2"></i>修改密码</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">退出登录</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>退出登录</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -67,11 +67,12 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container my-4 flex-grow-1">
         {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
                 {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ category }} alert-dismissible fade show animate-in" role="alert">
+                    <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category in ('warning','danger') else 'info-circle' }} me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -82,9 +83,9 @@
         {% block content %}{% endblock %}
     </div>
 
-    <footer class="mt-5 py-3 bg-light text-center text-muted">
-        <div class="container">
-            <small>&copy; 2026 ACM校队管理系统</small>
+    <footer>
+        <div class="container text-center">
+            <small>&copy; 2026 ACM校队管理系统 · 编程竞赛一站式管理平台</small>
         </div>
     </footer>
 
