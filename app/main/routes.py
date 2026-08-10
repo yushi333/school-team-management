@@ -5,7 +5,8 @@ from app.main import main_bp
 from app.main.forms import ProfileForm, PlatformHandleForm
 from app.models.user import User
 from app.models.platform import get_scrape_results, set_handle, delete_handle, get_handles
-from app.models.content import get_tutorials, get_tutorial, get_online_contests, get_campus_events, get_campus_event
+from app.models.content import (get_tutorials, get_tutorial, get_online_contests, get_campus_events,
+                                get_campus_event, get_awards)
 from app.models.registration import (get_registration, create_registration, delete_registration,
                                      get_today_ranking, get_today_rankings)
 
@@ -198,3 +199,9 @@ def cancel_registration(id):
     else:
         flash('您未报名该活动。', 'warning')
     return redirect(url_for('main.campus_event_detail', id=id))
+
+
+@main_bp.route('/awards')
+@login_required
+def awards():
+    return render_template('main/awards.html', awards=get_awards())

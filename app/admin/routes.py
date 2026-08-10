@@ -8,7 +8,7 @@ from app.models.content import (get_tutorials, create_tutorial, delete_tutorial,
                                 get_online_contests, create_online_contest, delete_online_contest,
                                 count_online_contests, get_campus_events, get_campus_event,
                                 create_campus_event, update_campus_event, delete_campus_event,
-                                count_campus_events)
+                                count_campus_events, get_awards, create_award, delete_award, count_awards)
 from app.models.registration import get_registrations, count_all_registrations
 from app.decorators import admin_required
 from app.database import query
@@ -23,7 +23,8 @@ def index():
                            tutorial_count=count_tutorials(),
                            contest_count=count_online_contests(),
                            event_count=count_campus_events(),
-                           reg_count=count_all_registrations())
+                           reg_count=count_all_registrations(),
+                           award_count=count_awards())
 
 
 # ---- Users ----
@@ -229,3 +230,65 @@ def export_registrations(id):
         from flask import abort; abort(404)
     from app.services.export import export_excel
     return export_excel(event)
+
+
+# ---- Awards ----
+@admin_bp.route('/awards')
+@login_required
+@admin_required
+def award_list():
+    return render_template('admin/award_list.html', awards=get_awards())
+
+
+@admin_bp.route('/awards/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_award():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        file = request.files.get('file')
+        if not title:
+            flash('请输入标题。', 'danger')
+            return redirect(url_for('admin.add_award'))
+        if not file or not file.filename:
+            flash('请选择文件。', 'danger')
+            return redirect(url_for('admin.add_award'))
+        # Determine file type
+        ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+        img_exts = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'}
+        doc_exts = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar'}
+        if ext in img_exts:
+            file_type = 'image'
+        elif ext in doc_exts:
+            file_type = 'document'
+        else:
+            file_type = 'other'
+
+        import os, uuid
+        upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'app', 'static', 'uploads', 'awards')
+        os.makedirs(upload_dir, exist_ok=True)
+        saved_name = f"{uuid.uuid4().hex[:12]}_{file.filename}"
+        save_path = os.path.join(upload_dir, saved_name)
+        file.save(save_path)
+        rel_path = f'uploads/awards/{saved_name}'
+        create_award(title, description or None, rel_path, file_type, file.filename, current_user.id)
+        flash('获奖材料已上传！', 'success')
+        return redirect(url_for('admin.award_list'))
+    return render_template('admin/award_form.html')
+
+
+@admin_bp.route('/awards/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_award_route(id):
+    award_data = get_award(id)
+    if award_data and award_data.get('file_path'):
+        import os
+        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        full_path = os.path.join(base, 'app', 'static', award_data['file_path'])
+        if os.path.exists(full_path):
+            os.remove(full_path)
+    delete_award(id)
+    flash('获奖材料已删除。', 'success')
+    return redirect(url_for('admin.award_list'))

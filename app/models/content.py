@@ -106,3 +106,28 @@ def delete_campus_event(eid):
 def count_campus_events():
     r = query("SELECT COUNT(*) as c FROM campus_events", one=True)
     return r['c']
+
+
+# ---- Awards ----
+def get_awards(order_by='created_at DESC'):
+    return query(f"SELECT a.*, u.real_name as uploader_name, u.username as uploader_username FROM awards a LEFT JOIN users u ON a.uploaded_by=u.id ORDER BY {order_by}")
+
+
+def get_award(aid):
+    return query("SELECT a.*, u.real_name as uploader_name, u.username as uploader_username FROM awards a LEFT JOIN users u ON a.uploaded_by=u.id WHERE a.id=?", (aid,), one=True)
+
+
+def create_award(title, description, file_path, file_type, original_filename, uploaded_by):
+    return execute(
+        "INSERT INTO awards (title, description, file_path, file_type, original_filename, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?)",
+        (title, description, file_path, file_type, original_filename, uploaded_by, datetime.utcnow())
+    )
+
+
+def delete_award(aid):
+    execute("DELETE FROM awards WHERE id=?", (aid,))
+
+
+def count_awards():
+    r = query("SELECT COUNT(*) as c FROM awards", one=True)
+    return r['c']

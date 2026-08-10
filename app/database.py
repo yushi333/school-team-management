@@ -100,6 +100,17 @@ def init_db(app):
             UNIQUE(user_id, snapshot_date)
         );
 
+        CREATE TABLE IF NOT EXISTS awards (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            file_path TEXT NOT NULL,
+            file_type TEXT NOT NULL,
+            original_filename TEXT NOT NULL,
+            uploaded_by INTEGER REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         PRAGMA foreign_keys = ON;
         PRAGMA journal_mode = WAL;
     ''')

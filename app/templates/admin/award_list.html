@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}获奖材料管理 - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-trophy"></i> 获奖材料管理</h4>
+    <a href="{{ url_for('admin.add_award') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 上传材料</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if awards %}
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr><th>标题</th><th>类型</th><th>文件</th><th>上传时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+                {% for a in awards %}
+                <tr>
+                    <td>{{ a.title }}</td>
+                    <td>
+                        {% if a.file_type == 'image' %}<span class="badge bg-info">图片</span>
+                        {% elif a.file_type == 'document' %}<span class="badge bg-secondary">文档</span>
+                        {% else %}<span class="badge bg-dark">其他</span>
+                        {% endif %}
+                    </td>
+                    <td><small class="text-muted">{{ a.original_filename }}</small></td>
+                    <td><small>{{ a.created_at[:10] if a.created_at else '' }}</small></td>
+                    <td>
+                        <a href="{{ url_for('static', filename=a.file_path) }}" class="btn btn-sm btn-outline-info" target="_blank">查看</a>
+                        <form method="POST" action="{{ url_for('admin.delete_award_route', id=a.id) }}" class="d-inline" onsubmit="return confirm('确定删除？');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">暂无获奖材料。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -40,6 +40,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('main.online_contests') }}"><i class="bi bi-globe"></i> 线上比赛</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('main.campus_events') }}"><i class="bi bi-building"></i> 校内活动</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.awards') }}"><i class="bi bi-trophy"></i> 获奖材料</a></li>
                         </ul>
                     </li>
                     {% if current_user.is_admin() %}
