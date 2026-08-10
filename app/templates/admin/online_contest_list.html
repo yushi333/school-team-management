@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}线上比赛管理 - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-globe"></i> 线上比赛管理 <small class="text-muted fs-6">(系统每日自动爬取 + 可手动添加)</small></h4>
+    <a href="{{ url_for('admin.add_online_contest') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 手动添加</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if contests %}
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr><th>标题</th><th>平台</th><th>来源</th><th>时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+                {% for c in contests %}
+                <tr>
+                    <td>{{ c.title }}</td>
+                    <td><span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success'}.get(c.platform, 'secondary') }}">{{ c.platform }}</span></td>
+                    <td>{{ '🤖 自动' if c.source == 'auto' else '✋ 手动' }}</td>
+                    <td><small>{{ c.start_time[:16] if c.start_time else '?' }}</small></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.delete_online_contest_route', id=c.id) }}" onsubmit="return confirm('确定删除？');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">暂无线上比赛资讯</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

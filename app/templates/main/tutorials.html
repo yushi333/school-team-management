@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}教学板块 - 校队管理系统{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-play-circle text-info"></i> 教学板块</h3>
+
+{% if tutorials %}
+<div class="row g-3">
+    {% for t in tutorials %}
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ t.title }}</h5>
+                <p class="card-text text-muted small">{{ t.description or '暂无描述' }}</p>
+                <a href="{{ url_for('main.tutorial_detail', id=t.id) }}" class="btn btn-outline-primary btn-sm">查看详情</a>
+            </div>
+            <div class="card-footer text-muted small">
+                发布: {{ t.poster_name or t.poster_username }} · {{ t.created_at[:10] if t.created_at else '' }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">暂无教学视频。</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}排行榜 - 校队管理系统{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-trophy text-warning"></i> 排行榜</h3>
+
+<div class="card">
+    <div class="card-body">
+        {% if rankings %}
+        <table class="table table-striped leaderboard-table align-middle">
+            <thead>
+                <tr>
+                    <th width="60">排名</th>
+                    <th>用户名</th>
+                    <th>姓名</th>
+                    <th>年级</th>
+                    <th>总题量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rankings %}
+                <tr>
+                    <td>
+                        {% if r.rank == 1 %}<span class="badge bg-warning text-dark fs-6">🥇 1</span>
+                        {% elif r.rank == 2 %}<span class="badge bg-secondary fs-6">🥈 2</span>
+                        {% elif r.rank == 3 %}<span class="badge bg-danger fs-6">🥉 3</span>
+                        {% else %}{{ r.rank }}{% endif %}
+                    </td>
+                    <td>{{ r.username }}</td>
+                    <td>{{ r.real_name or '-' }}</td>
+                    <td>{{ r.grade or '-' }}</td>
+                    <td><strong>{{ r.total_solved }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">暂无排行数据。系统将在每日凌晨自动更新。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

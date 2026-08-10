@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{% if edit_mode %}编辑用户{% else %}创建用户{% endif %} - 管理后台{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">{% if edit_mode %}编辑用户: {{ target_user.username }}{% else %}<i class="bi bi-plus-lg"></i> 创建新用户{% endif %}</h4>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    {% if not edit_mode %}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control") }}
+                        {% for e in form.username.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", placeholder="至少6位") }}
+                        {% for e in form.password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        {{ form.real_name.label(class="form-label") }}
+                        {{ form.real_name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.grade.label(class="form-label") }}
+                        {{ form.grade(class="form-select") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.role.label(class="form-label") }}
+                        {{ form.role(class="form-select") }}
+                    </div>
+
+                    {{ form.submit(class="btn btn-primary") }}
+                    <a href="{{ url_for('admin.user_list') }}" class="btn btn-secondary">返回</a>
+                </form>
+
+                {% if edit_mode %}
+                <hr>
+                <h6>重置密码</h6>
+                <form method="POST" action="{{ url_for('admin.reset_password', id=target_user.id) }}" class="row g-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="col-7">
+                        <input type="text" name="new_password" class="form-control" placeholder="输入新密码（至少6位）" required minlength="6">
+                    </div>
+                    <div class="col-5">
+                        <button type="submit" class="btn btn-warning">重置密码</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}线上比赛 - 校队管理系统{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-globe text-primary"></i> 线上比赛资讯</h3>
+
+<p class="text-muted small mb-3"><i class="bi bi-info-circle"></i> 比赛资讯由系统每日自动从各平台爬取，也可由管理员手动添加。</p>
+{% if contests %}
+<div class="row g-3">
+    {% for c in contests %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success'}.get(c.platform, 'secondary') }}">
+                        {{ {'luogu':'洛谷','nowcoder':'牛客','codeforces':'Codeforces','atcoder':'AtCoder','other':'其他'}.get(c.platform, c.platform) }}
+                    </span>
+                    {% if c.source == 'auto' %}<small class="text-success ms-1">🤖</small>{% endif %}
+                </div>
+                {% if c.start_time %}
+                <small class="text-muted">{{ c.start_time[:16] if c.start_time else '' }}</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ c.title }}</h5>
+                {% if c.description %}
+                <p class="card-text text-muted">{{ c.description[:200] }}{% if c.description|length > 200 %}...{% endif %}</p>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center">
+                    {% if c.end_time %}
+                    <small class="text-muted">截止: {{ c.end_time[:16] if c.end_time else '' }}</small>
+                    {% endif %}
+                    {% if c.contest_url %}
+                    <a href="{{ c.contest_url }}" target="_blank" class="btn btn-sm btn-outline-primary">前往比赛 →</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">暂无线上比赛资讯。</div>
+{% endif %}
+{% endblock %}

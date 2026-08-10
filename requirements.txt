@@ -1,0 +1,10 @@
+Flask>=3.0
+Flask-Login>=0.6
+Flask-WTF>=1.2
+email-validator
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+openpyxl>=3.1
+APScheduler>=3.10
+waitress>=3.0

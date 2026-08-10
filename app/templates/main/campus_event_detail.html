@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} - 校内活动{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.campus_events') }}">校内活动</a></li>
+        <li class="breadcrumb-item active">{{ event.title }}</li>
+    </ol>
+</nav>
+
+{% if is_registered %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> 您已成功报名此活动。
+    <form method="POST" action="{{ url_for('main.cancel_registration', id=event.id) }}" class="d-inline ms-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-outline-danger btn-sm">取消报名</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h4>{{ event.title }}</h4>
+                <p class="text-muted small">
+                    发布者: {{ event.poster_name or event.poster_username }} ·
+                    {{ event.created_at[:10] if event.created_at else '' }}
+                </p>
+                <hr>
+                <table class="table table-sm w-auto">
+                    <tr><td class="text-muted">活动日期</td><td>{{ event.event_date or '未定' }}</td></tr>
+                    <tr><td class="text-muted">活动地点</td><td>{{ event.location or '未定' }}</td></tr>
+                    <tr><td class="text-muted">报名截止</td><td>{{ event.registration_deadline[:16] if event.registration_deadline else '不限' }}</td></tr>
+                    <tr><td class="text-muted">报名人数</td><td>{{ event.reg_count }} 人</td></tr>
+                </table>
+                {% if event.content %}
+                <hr>
+                <div>{{ event.content|replace('\n', '<br>')|safe }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if not is_registered and can_register %}
+        <div class="card">
+            <div class="card-header bg-success text-white">立即报名</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.register_event', id=event.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">联系电话</label>
+                        <input type="text" name="contact_phone" class="form-control" placeholder="手机号">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">联系邮箱</label>
+                        <input type="email" name="contact_email" class="form-control" placeholder="email@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">备注</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="如有特殊需求请注明"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">提交报名</button>
+                </form>
+            </div>
+        </div>
+        {% elif not is_registered and not can_register %}
+        <div class="alert alert-warning">报名已截止或已关闭。</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

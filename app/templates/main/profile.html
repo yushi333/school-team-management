@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}个人信息 - 校队管理系统{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-person"></i> 个人信息</h3>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>基本信息</span>
+                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-primary">编辑</a>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr><td class="text-muted" width="100">用户名</td><td>{{ current_user.username }}</td></tr>
+                    <tr><td class="text-muted">姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>平台账号</span>
+                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-primary">编辑</a>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr><td class="text-muted">洛谷</td><td>{{ handles.get('luogu', '-') }}</td></tr>
+                    <tr><td class="text-muted">牛客</td><td>{{ handles.get('nowcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted">AtCoder</td><td>{{ handles.get('atcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted">Codeforces</td><td>{{ handles.get('codeforces', '-') }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Platform Stats -->
+<div class="card mb-4">
+    <div class="card-header">刷题数据</div>
+    <div class="card-body">
+        {% if scrape_results %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>平台</th>
+                    <th>已解决</th>
+                    <th>评分</th>
+                    <th>最后更新</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in scrape_results %}
+                <tr>
+                    <td><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces'}.get(r.platform, r.platform) }}</span></td>
+                    <td><strong>{{ r.total_solved }}</strong></td>
+                    <td>{{ r.rating or '-' }}</td>
+                    <td>{{ r.scraped_at[:16] if r.scraped_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">暂无刷题数据。请先在编辑资料中设置平台账号，系统将在每日凌晨自动更新数据。</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Charts -->
+{% if platform_data and platform_data|sum > 0 %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">各平台题量占比</div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="platformPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if all_categories %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">做题风格分布</div>
+            <div class="card-body">
+                <div class="chart-container-wide">
+                    <canvas id="categoryBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if platform_data and platform_data|sum > 0 %}
+<script>
+// Platform pie chart
+const pieCtx = document.getElementById('platformPieChart').getContext('2d');
+new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ platform_labels|tojson }},
+        datasets: [{
+            data: {{ platform_data|tojson }},
+            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#e67e22'],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+
+{% if all_categories %}
+// Category bar chart
+const barCtx = document.getElementById('categoryBarChart').getContext('2d');
+const catData = {{ all_categories|tojson }};
+const catLabels = Object.keys(catData);
+const catValues = Object.values(catData);
+new Chart(barCtx, {
+    type: 'bar',
+    data: {
+        labels: catLabels,
+        datasets: [{
+            label: '题量',
+            data: catValues,
+            backgroundColor: '#4472C4',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: '题量' } }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endif %}
+{% endblock %}

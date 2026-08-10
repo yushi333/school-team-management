@@ -1,0 +1,47 @@
+/* General */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Cards */
+.card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Stat cards on dashboard */
+.stat-card {
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Platform badge colors */
+.badge-luogu { background-color: #3498db; }
+.badge-nowcoder { background-color: #e74c3c; }
+.badge-atcoder { background-color: #2ecc71; }
+.badge-codeforces { background-color: #e67e22; }
+
+/* Leaderboard */
+.leaderboard-table th {
+    background-color: #4472C4;
+    color: white;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+}
+.chart-container-wide {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid #dee2e6;
+}
