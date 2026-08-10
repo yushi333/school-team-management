@@ -75,8 +75,9 @@ def edit_profile():
 
     if request.method == 'GET':
         for h in get_handles(current_user.id):
-            if h['platform'] in ['luogu', 'nowcoder', 'atcoder', 'codeforces']:
-                setattr(handle_form, h['platform'], h['handle'])
+            field = getattr(handle_form, h['platform'], None)
+            if field:
+                field.data = h['handle']
 
     if request.method == 'POST':
         if 'submit_profile' in request.form and profile_form.validate_on_submit():
