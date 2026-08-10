@@ -8,15 +8,14 @@ from app.models.content import upsert_online_contest, cleanup_old_contests
 from app.scraper.codeforces import CodeforcesScraper
 from app.scraper.atcoder import AtCoderScraper
 from app.scraper.luogu import LuoguScraper
-from app.scraper.nowcoder import NowcoderScraper
 from app.scraper.contests import scrape_all_contests
 
 
+# Only platforms that can be auto-scraped (nowcoder/leetcode/lanqiao are manual entry)
 SCRAPER_MAP = {
     'codeforces': CodeforcesScraper,
     'atcoder': AtCoderScraper,
     'luogu': LuoguScraper,
-    'nowcoder': NowcoderScraper,
 }
 
 

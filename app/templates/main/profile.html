@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}个人信息 - 校队管理系统{% endblock %}
+{% block title %}个人信息 - ACM校队管理系统{% endblock %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 {% endblock %}
@@ -35,6 +35,8 @@
                     <tr><td class="text-muted">牛客</td><td>{{ handles.get('nowcoder', '-') }}</td></tr>
                     <tr><td class="text-muted">AtCoder</td><td>{{ handles.get('atcoder', '-') }}</td></tr>
                     <tr><td class="text-muted">Codeforces</td><td>{{ handles.get('codeforces', '-') }}</td></tr>
+                    <tr><td class="text-muted">力扣</td><td>{{ handles.get('leetcode', '-') }}</td></tr>
+                    <tr><td class="text-muted">蓝桥杯</td><td>{{ handles.get('lanqiao', '-') }}</td></tr>
                 </table>
             </div>
         </div>
@@ -58,7 +60,7 @@
             <tbody>
                 {% for r in scrape_results %}
                 <tr>
-                    <td><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces'}.get(r.platform, r.platform) }}</span></td>
+                    <td><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(r.platform, r.platform) }}</span></td>
                     <td><strong>{{ r.total_solved }}</strong></td>
                     <td>{{ r.rating or '-' }}</td>
                     <td>{{ r.scraped_at[:16] if r.scraped_at else '-' }}</td>
@@ -67,7 +69,7 @@
             </tbody>
         </table>
         {% else %}
-        <p class="text-muted">暂无刷题数据。请先在编辑资料中设置平台账号，系统将在每日凌晨自动更新数据。</p>
+        <p class="text-muted">暂无刷题数据。请先在编辑资料中设置平台账号，系统将定时自动更新数据。</p>
         {% endif %}
     </div>
 </div>
@@ -112,7 +114,7 @@ new Chart(pieCtx, {
         labels: {{ platform_labels|tojson }},
         datasets: [{
             data: {{ platform_data|tojson }},
-            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#e67e22'],
+            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#e67e22', '#f39c12', '#9b59b6'],
         }]
     },
     options: {

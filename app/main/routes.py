@@ -42,7 +42,8 @@ def profile():
     scrape_results = get_scrape_results(current_user.id)
     platform_labels = []
     platform_data = []
-    name_map = {'luogu': '洛谷', 'nowcoder': '牛客', 'atcoder': 'AtCoder', 'codeforces': 'Codeforces'}
+    name_map = {'luogu': '洛谷', 'nowcoder': '牛客', 'atcoder': 'AtCoder', 'codeforces': 'Codeforces',
+                'leetcode': '力扣', 'lanqiao': '蓝桥杯'}
     for r in scrape_results:
         platform_labels.append(name_map.get(r['platform'], r['platform']))
         platform_data.append(r['total_solved'])
@@ -73,11 +74,21 @@ def edit_profile():
     profile_form = ProfileForm(obj=current_user)
     handle_form = PlatformHandleForm()
 
+    ALL_PLATFORMS = ['luogu', 'nowcoder', 'atcoder', 'codeforces', 'leetcode', 'lanqiao']
+    SCRAPABLE = ['luogu', 'atcoder', 'codeforces']  # nowcoder broken, leetcode/lanqiao manual
+
     if request.method == 'GET':
         for h in get_handles(current_user.id):
             field = getattr(handle_form, h['platform'], None)
-            if field:
+            if field and hasattr(field, 'data'):
                 field.data = h['handle']
+        # Pre-fill manual counts from scrape_results
+        from app.models.platform import get_scrape_results
+        for r in get_scrape_results(current_user.id):
+            count_field_name = f"{r['platform']}_count"
+            field = getattr(handle_form, count_field_name, None)
+            if field and hasattr(field, 'data'):
+                field.data = r['total_solved']
 
     if request.method == 'POST':
         if 'submit_profile' in request.form and profile_form.validate_on_submit():
@@ -89,13 +100,24 @@ def edit_profile():
             return redirect(url_for('main.profile'))
 
         if 'submit_handles' in request.form and handle_form.validate_on_submit():
-            for platform in ['luogu', 'nowcoder', 'atcoder', 'codeforces']:
+            for platform in ALL_PLATFORMS:
                 val = getattr(handle_form, platform).data
                 if val and val.strip():
                     set_handle(current_user.id, platform, val.strip())
                 elif not val or not val.strip():
                     delete_handle(current_user.id, platform)
-            # Immediately scrape in background thread
+            # Save manual counts for non-scrapable platforms
+            from app.models.platform import upsert_scrape_result
+            import json
+            for platform in ['nowcoder', 'leetcode', 'lanqiao']:
+                count_field = getattr(handle_form, f'{platform}_count')
+                if count_field and count_field.data is not None:
+                    upsert_scrape_result(
+                        user_id=current_user.id,
+                        platform=platform,
+                        total_solved=count_field.data,
+                    )
+            # Immediately scrape scrapable platforms in background
             _scrape_user_async(current_user.id)
             flash('平台账号已更新，正在后台拉取刷题数据...', 'success')
             return redirect(url_for('main.profile'))

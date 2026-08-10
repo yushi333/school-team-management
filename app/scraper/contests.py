@@ -169,6 +169,28 @@ def scrape_luogu_contests():
     return contests
 
 
+def scrape_leetcode_contests():
+    """Scrape upcoming LeetCode contests. LeetCode doesn't have a public API
+    for upcoming contests, so this returns an empty list for now.
+    Admin can manually add LeetCode contests."""
+    contests = []
+    # LeetCode weekly contest is always Sunday 10:30 AM UTC+8
+    # LeetCode biweekly contest is Saturday 10:30 PM UTC+8
+    # Since LeetCode doesn't provide an easy API for upcoming contests,
+    # we leave this for manual entry.
+    return contests
+
+
+def scrape_lanqiao_contests():
+    """Scrape upcoming Lanqiao Cup contests. Lanqiao doesn't have a public API
+    or structured contest listing, so this returns an empty list for now.
+    Admin can manually add Lanqiao contests."""
+    contests = []
+    # Lanqiao official site: https://dasai.lanqiao.cn/
+    # Contest schedule is usually announced via notices, not a structured listing.
+    return contests
+
+
 def scrape_all_contests():
     """Scrape upcoming contests from all platforms. Returns list of dicts."""
     all_contests = []
@@ -178,8 +200,9 @@ def scrape_all_contests():
     scrapers = [
         ('codeforces', scrape_codeforces_contests),
         ('atcoder', scrape_atcoder_contests),
-        ('nowcoder', scrape_nowcoder_contests),
         ('luogu', scrape_luogu_contests),
+        ('leetcode', scrape_leetcode_contests),
+        ('lanqiao', scrape_lanqiao_contests),
     ]
     for name, scraper in scrapers:
         try:

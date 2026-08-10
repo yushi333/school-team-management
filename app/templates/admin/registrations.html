@@ -1,19 +1,10 @@
 {% extends "base.html" %}
-{% block title %}报名管理 - {{ event.title }}{% endblock %}
+{% block title %}报名详情 - 管理后台{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.campus_event_list') }}">校内活动管理</a></li>
-        <li class="breadcrumb-item active">报名详情: {{ event.title }}</li>
-    </ol>
-</nav>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4><i class="bi bi-list-check"></i> 报名列表 <span class="badge bg-primary">{{ registrations|length }} 人</span></h4>
-    <a href="{{ url_for('admin.export_registrations', id=event.id) }}" class="btn btn-success">
-        <i class="bi bi-download"></i> 导出 Excel
-    </a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="bi bi-clipboard-check"></i> 报名详情: {{ event.title }}</h4>
+    <a href="{{ url_for('admin.export_registrations', id=event.id) }}" class="btn btn-success"><i class="bi bi-download"></i> 导出Excel</a>
 </div>
 
 <div class="card">
@@ -21,28 +12,17 @@
         {% if registrations %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>用户名</th>
-                    <th>姓名</th>
-                    <th>年级</th>
-                    <th>电话</th>
-                    <th>邮箱</th>
-                    <th>备注</th>
-                    <th>报名时间</th>
-                </tr>
+                <tr><th>姓名</th><th>年级</th><th>联系电话</th><th>邮箱</th><th>备注</th><th>报名时间</th></tr>
             </thead>
             <tbody>
                 {% for r in registrations %}
                 <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ r.username }}</td>
-                    <td>{{ r.real_name or '-' }}</td>
+                    <td>{{ r.real_name or r.username }}</td>
                     <td>{{ r.grade or '-' }}</td>
                     <td>{{ r.contact_phone or '-' }}</td>
                     <td>{{ r.contact_email or '-' }}</td>
                     <td>{{ r.notes or '-' }}</td>
-                    <td><small>{{ r.registered_at[:16] if r.registered_at else '-' }}</small></td>
+                    <td><small>{{ r.registered_at[:16] if r.registered_at else '' }}</small></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -52,4 +32,5 @@
         {% endif %}
     </div>
 </div>
+<a href="{{ url_for('admin.campus_event_list') }}" class="btn btn-secondary mt-3">返回活动列表</a>
 {% endblock %}

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4><i class="bi bi-play-circle"></i> 教学视频管理</h4>
-    <a href="{{ url_for('admin.add_tutorial') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 发布视频</a>
+    <a href="{{ url_for('admin.add_tutorial') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 添加视频</a>
 </div>
 
 <div class="card">
@@ -12,13 +12,13 @@
         {% if tutorials %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>标题</th><th>链接</th><th>发布时间</th><th>操作</th></tr>
+                <tr><th>标题</th><th>链接</th><th>时间</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for t in tutorials %}
                 <tr>
                     <td>{{ t.title }}</td>
-                    <td><a href="{{ t.video_url }}" target="_blank" class="small">{{ t.video_url[:50] }}...</a></td>
+                    <td><a href="{{ t.video_url }}" target="_blank" class="text-truncate d-inline-block" style="max-width:300px">{{ t.video_url }}</a></td>
                     <td><small>{{ t.created_at[:10] if t.created_at else '' }}</small></td>
                     <td>
                         <form method="POST" action="{{ url_for('admin.delete_tutorial_route', id=t.id) }}" onsubmit="return confirm('确定删除？');">
@@ -31,7 +31,7 @@
             </tbody>
         </table>
         {% else %}
-        <p class="text-muted">暂无教学视频</p>
+        <p class="text-muted">暂无教学视频。</p>
         {% endif %}
     </div>
 </div>

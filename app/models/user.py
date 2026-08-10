@@ -106,8 +106,8 @@ class User(UserMixin):
 
     def update(self, **kwargs):
         sets = ', '.join(f"{k}=?" for k in kwargs)
-        values = list(kwargs.values()) + [self._data['id']]
-        execute(f"UPDATE users SET {sets}, updated_at=? WHERE id=?", values + [datetime.utcnow()])
+        values = list(kwargs.values())
+        execute(f"UPDATE users SET {sets}, updated_at=? WHERE id=?", values + [datetime.utcnow(), self._data['id']])
         for k, v in kwargs.items():
             self._data[k] = v
 

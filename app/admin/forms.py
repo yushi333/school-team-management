@@ -35,10 +35,12 @@ class TutorialForm(FlaskForm):
 class OnlineContestForm(FlaskForm):
     title = StringField('比赛标题', validators=[DataRequired(), Length(max=256)])
     platform = SelectField('比赛平台', choices=[
-        ('luogu', '洛谷 (Luogu)'),
-        ('nowcoder', '牛客 (Nowcoder)'),
         ('codeforces', 'Codeforces'),
         ('atcoder', 'AtCoder'),
+        ('nowcoder', '牛客 (Nowcoder)'),
+        ('luogu', '洛谷 (Luogu)'),
+        ('leetcode', '力扣 (LeetCode)'),
+        ('lanqiao', '蓝桥杯'),
         ('other', '其他'),
     ])
     contest_url = StringField('比赛链接', validators=[Optional(), URL(message='请输入有效URL'), Length(max=512)])

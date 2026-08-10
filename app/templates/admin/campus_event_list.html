@@ -12,20 +12,19 @@
         {% if events %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>标题</th><th>日期</th><th>报名人数</th><th>状态</th><th>发布时间</th><th>操作</th></tr>
+                <tr><th>标题</th><th>日期</th><th>报名</th><th>状态</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for e in events %}
                 <tr>
                     <td>{{ e.title }}</td>
                     <td>{{ e.event_date or '未定' }}</td>
-                    <td>{{ e.reg_count }}</td>
+                    <td>{{ e.reg_count }} 人</td>
                     <td>{% if e.is_open %}<span class="badge bg-success">开放</span>{% else %}<span class="badge bg-secondary">关闭</span>{% endif %}</td>
-                    <td><small>{{ e.created_at[:10] if e.created_at else '' }}</small></td>
                     <td>
-                        <a href="{{ url_for('admin.view_registrations', id=e.id) }}" class="btn btn-sm btn-outline-info">报名</a>
-                        <a href="{{ url_for('admin.export_registrations', id=e.id) }}" class="btn btn-sm btn-outline-success">导出</a>
                         <a href="{{ url_for('admin.edit_campus_event', id=e.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>
+                        <a href="{{ url_for('admin.view_registrations', id=e.id) }}" class="btn btn-sm btn-outline-info">查看报名</a>
+                        <a href="{{ url_for('admin.export_registrations', id=e.id) }}" class="btn btn-sm btn-outline-success">导出Excel</a>
                         <form method="POST" action="{{ url_for('admin.delete_campus_event_route', id=e.id) }}" class="d-inline" onsubmit="return confirm('确定删除？');">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
@@ -36,7 +35,7 @@
             </tbody>
         </table>
         {% else %}
-        <p class="text-muted">暂无校内活动</p>
+        <p class="text-muted">暂无校内活动。</p>
         {% endif %}
     </div>
 </div>

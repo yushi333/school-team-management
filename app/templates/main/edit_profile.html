@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}编辑资料 - 校队管理系统{% endblock %}
+{% block title %}编辑资料 - ACM校队管理系统{% endblock %}
 
 {% block content %}
 <h3 class="mb-4"><i class="bi bi-pencil-square"></i> 编辑资料</h3>
@@ -45,6 +45,28 @@
                     <div class="mb-3">
                         {{ handle_form.codeforces.label(class="form-label") }}
                         {{ handle_form.codeforces(class="form-control", placeholder="Codeforces Handle") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ handle_form.leetcode.label(class="form-label") }}
+                        {{ handle_form.leetcode(class="form-control", placeholder="力扣用户名") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ handle_form.lanqiao.label(class="form-label") }}
+                        {{ handle_form.lanqiao(class="form-control", placeholder="蓝桥杯账号") }}
+                    </div>
+                    <hr>
+                    <p class="text-muted small"><i class="bi bi-info-circle"></i> 以下平台暂不支持自动爬取，请手动填写题量：</p>
+                    <div class="mb-3">
+                        {{ handle_form.nowcoder_count.label(class="form-label") }}
+                        {{ handle_form.nowcoder_count(class="form-control", placeholder="牛客已解决题目数") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ handle_form.leetcode_count.label(class="form-label") }}
+                        {{ handle_form.leetcode_count(class="form-control", placeholder="力扣已解决题目数") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ handle_form.lanqiao_count.label(class="form-label") }}
+                        {{ handle_form.lanqiao_count(class="form-control", placeholder="蓝桥杯已解决题目数") }}
                     </div>
                     <button type="submit" name="submit_handles" class="btn btn-primary">保存平台账号</button>
                 </form>

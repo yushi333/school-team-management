@@ -18,7 +18,7 @@
                 {% for c in contests %}
                 <tr>
                     <td>{{ c.title }}</td>
-                    <td><span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success'}.get(c.platform, 'secondary') }}">{{ c.platform }}</span></td>
+                    <td><span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success','leetcode':'warning','lanqiao':'info'}.get(c.platform, 'secondary') }}">{{ c.platform }}</span></td>
                     <td>{{ '🤖 自动' if c.source == 'auto' else '✋ 手动' }}</td>
                     <td><small>{{ c.start_time[:16] if c.start_time else '?' }}</small></td>
                     <td>

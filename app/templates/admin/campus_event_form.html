@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{% if edit_mode %}编辑活动{% else %}发布校内活动{% endif %} - 管理后台{% endblock %}
+{% block title %}{% if edit_mode %}编辑校内活动{% else %}发布校内活动{% endif %} - 管理后台{% endblock %}
 
 {% block content %}
-<h4 class="mb-4">{% if edit_mode %}编辑活动{% else %}<i class="bi bi-plus-lg"></i> 发布校内活动{% endif %}</h4>
+<h4 class="mb-4">{% if edit_mode %}编辑校内活动{% else %}<i class="bi bi-plus-lg"></i> 发布校内活动{% endif %}</h4>
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-body">
                 <form method="POST">
@@ -13,31 +13,30 @@
                     <div class="mb-3">
                         {{ form.title.label(class="form-label") }}
                         {{ form.title(class="form-control") }}
+                        {% for e in form.title.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                     </div>
                     <div class="mb-3">
                         {{ form.content.label(class="form-label") }}
-                        {{ form.content(class="form-control", rows=5) }}
+                        {{ form.content(class="form-control", rows=4) }}
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            {{ form.location.label(class="form-label") }}
-                            {{ form.location(class="form-control", placeholder="如：计算机学院 301") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.event_date.label(class="form-label") }}
-                            {{ form.event_date(class="form-control", placeholder="YYYY-MM-DD") }}
-                        </div>
+                    <div class="mb-3">
+                        {{ form.location.label(class="form-label") }}
+                        {{ form.location(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.event_date.label(class="form-label") }}
+                        {{ form.event_date(class="form-control", placeholder="2026-01-01") }}
                     </div>
                     <div class="mb-3">
                         {{ form.registration_deadline.label(class="form-label") }}
-                        {{ form.registration_deadline(class="form-control", placeholder="YYYY-MM-DD HH:MM") }}
+                        {{ form.registration_deadline(class="form-control", placeholder="2026-01-01 12:00") }}
                     </div>
                     <div class="mb-3 form-check">
                         {{ form.is_open(class="form-check-input") }}
                         {{ form.is_open.label(class="form-check-label") }}
                     </div>
                     {{ form.submit(class="btn btn-primary") }}
-                    <a href="{{ url_for('admin.campus_event_list') }}" class="btn btn-secondary">取消</a>
+                    <a href="{{ url_for('admin.campus_event_list') }}" class="btn btn-secondary">返回</a>
                 </form>
             </div>
         </div>

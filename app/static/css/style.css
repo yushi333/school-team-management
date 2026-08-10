@@ -22,6 +22,8 @@ body {
 .badge-nowcoder { background-color: #e74c3c; }
 .badge-atcoder { background-color: #2ecc71; }
 .badge-codeforces { background-color: #e67e22; }
+.badge-leetcode { background-color: #f39c12; }
+.badge-lanqiao { background-color: #9b59b6; }
 
 /* Leaderboard */
 .leaderboard-table th {

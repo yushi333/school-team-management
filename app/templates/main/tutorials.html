@@ -1,21 +1,23 @@
 {% extends "base.html" %}
-{% block title %}教学板块 - 校队管理系统{% endblock %}
+{% block title %}教学板块 - ACM校队管理系统{% endblock %}
 
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-play-circle text-info"></i> 教学板块</h3>
+<h3 class="mb-4"><i class="bi bi-play-circle text-primary"></i> 教学板块</h3>
 
 {% if tutorials %}
 <div class="row g-3">
     {% for t in tutorials %}
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">{{ t.title }}</h5>
-                <p class="card-text text-muted small">{{ t.description or '暂无描述' }}</p>
-                <a href="{{ url_for('main.tutorial_detail', id=t.id) }}" class="btn btn-outline-primary btn-sm">查看详情</a>
+                {% if t.description %}
+                <p class="card-text text-muted">{{ t.description[:200] }}{% if t.description|length > 200 %}...{% endif %}</p>
+                {% endif %}
+                <a href="{{ url_for('main.tutorial_detail', id=t.id) }}" class="btn btn-sm btn-outline-primary">查看详情</a>
             </div>
             <div class="card-footer text-muted small">
-                发布: {{ t.poster_name or t.poster_username }} · {{ t.created_at[:10] if t.created_at else '' }}
+                <i class="bi bi-clock"></i> {{ t.created_at[:10] if t.created_at else '' }}
             </div>
         </div>
     </div>

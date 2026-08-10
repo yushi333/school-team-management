@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}线上比赛 - 校队管理系统{% endblock %}
+{% block title %}线上比赛 - ACM校队管理系统{% endblock %}
 
 {% block content %}
 <h3 class="mb-4"><i class="bi bi-globe text-primary"></i> 线上比赛资讯</h3>
@@ -12,8 +12,8 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success'}.get(c.platform, 'secondary') }}">
-                        {{ {'luogu':'洛谷','nowcoder':'牛客','codeforces':'Codeforces','atcoder':'AtCoder','other':'其他'}.get(c.platform, c.platform) }}
+                    <span class="badge bg-{{ {'luogu':'primary','nowcoder':'danger','codeforces':'warning','atcoder':'success','leetcode':'warning','lanqiao':'info'}.get(c.platform, 'secondary') }}">
+                        {{ {'luogu':'洛谷','nowcoder':'牛客','codeforces':'Codeforces','atcoder':'AtCoder','leetcode':'力扣','lanqiao':'蓝桥杯','other':'其他'}.get(c.platform, c.platform) }}
                     </span>
                     {% if c.source == 'auto' %}<small class="text-success ms-1">🤖</small>{% endif %}
                 </div>

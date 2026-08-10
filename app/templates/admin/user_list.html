@@ -11,30 +11,20 @@
     <div class="card-body">
         <table class="table table-striped align-middle">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>用户名</th>
-                    <th>姓名</th>
-                    <th>年级</th>
-                    <th>角色</th>
-                    <th>创建时间</th>
-                    <th>操作</th>
-                </tr>
+                <tr><th>用户名</th><th>姓名</th><th>年级</th><th>角色</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for u in users %}
                 <tr>
-                    <td>{{ u.id }}</td>
                     <td>{{ u.username }}</td>
                     <td>{{ u.real_name or '-' }}</td>
                     <td>{{ u.grade or '-' }}</td>
-                    <td>{% if u.is_admin() %}<span class="badge bg-warning">管理员</span>{% else %}<span class="badge bg-secondary">成员</span>{% endif %}</td>
-                    <td><small>{{ u.created_at[:10] if u.created_at else '' }}</small></td>
+                    <td><span class="badge bg-{{ 'danger' if u.role == 'admin' else 'secondary' }}">{{ '管理员' if u.role == 'admin' else '成员' }}</span></td>
                     <td>
                         <a href="{{ url_for('admin.edit_user', id=u.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>
-                        <form method="POST" action="{{ url_for('admin.delete_user', id=u.id) }}" class="d-inline" onsubmit="return confirm('确定删除用户 {{ u.username }}？');">
+                        <form method="POST" action="{{ url_for('admin.delete_user', id=u.id) }}" class="d-inline" onsubmit="return confirm('确定删除？');">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" {% if u.id == current_user.id %}disabled{% endif %}>删除</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
                         </form>
                     </td>
                 </tr>
