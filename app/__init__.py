@@ -64,9 +64,9 @@ def _start_scheduler(app):
         time.sleep(5)
         try:
             from apscheduler.schedulers.background import BackgroundScheduler
-            from apscheduler.triggers.cron import CronTrigger
+            from apscheduler.triggers.interval import IntervalTrigger
             scheduler = BackgroundScheduler(daemon=True)
-            if not scheduler.get_job('daily_scrape'):
+            if not scheduler.get_job('scrape_job'):
                 def job():
                     with app.app_context():
                         try:
@@ -74,9 +74,9 @@ def _start_scheduler(app):
                             scrape_all()
                         except Exception as e:
                             print(f"[Scheduler] Error: {e}")
-                scheduler.add_job(job, CronTrigger(hour=2, minute=0), id='daily_scrape')
+                scheduler.add_job(job, IntervalTrigger(hours=2), id='scrape_job')
                 scheduler.start()
-                print("[Scheduler] Started (daily at 2:00 AM)")
+                print("[Scheduler] Started (every 2 hours)")
         except Exception as e:
             print(f"[Scheduler] Not available: {e}")
 

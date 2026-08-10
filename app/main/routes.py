@@ -1,5 +1,6 @@
 from datetime import datetime
-from flask import render_template, redirect, url_for, flash, request
+import threading
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from app.main import main_bp
 from app.main.forms import ProfileForm, PlatformHandleForm
@@ -93,7 +94,9 @@ def edit_profile():
                     set_handle(current_user.id, platform, val.strip())
                 elif not val or not val.strip():
                     delete_handle(current_user.id, platform)
-            flash('平台账号已更新。', 'success')
+            # Immediately scrape in background thread
+            _scrape_user_async(current_user.id)
+            flash('平台账号已更新，正在后台拉取刷题数据...', 'success')
             return redirect(url_for('main.profile'))
 
     return render_template('main/edit_profile.html', profile_form=profile_form, handle_form=handle_form)
@@ -205,3 +208,22 @@ def cancel_registration(id):
 @login_required
 def awards():
     return render_template('main/awards.html', awards=get_awards())
+
+
+def _scrape_user_async(user_id):
+    """Run a single-user scrape in a background thread."""
+    app = current_app._get_current_object()
+
+    def _run():
+        with app.app_context():
+            try:
+                from app.scraper.orchestrator import scrape_single_user
+                from app.models.registration import recompute_rankings
+                scrape_single_user(user_id)
+                recompute_rankings()
+                print(f"[BG] Scraped user {user_id}")
+            except Exception as e:
+                print(f"[BG] Scrape error for user {user_id}: {e}")
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
