@@ -1,0 +1,18 @@
+[Unit]
+Description=ACM校队管理系统
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/school-team-management
+ExecStart=/usr/bin/python3 /root/school-team-management/run.py --prod
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=FLASK_ENV=production
+Environment=PORT=5000
+
+[Install]
+WantedBy=multi-user.target
