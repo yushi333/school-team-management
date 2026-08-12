@@ -8,14 +8,16 @@ from app.models.content import upsert_online_contest, cleanup_old_contests
 from app.scraper.codeforces import CodeforcesScraper
 from app.scraper.atcoder import AtCoderScraper
 from app.scraper.luogu import LuoguScraper
+from app.scraper.nowcoder import NowcoderScraper
 from app.scraper.contests import scrape_all_contests
 
 
-# Only platforms that can be auto-scraped (nowcoder/leetcode/lanqiao are manual entry)
+# Platforms that can be auto-scraped (leetcode/lanqiao are manual entry)
 SCRAPER_MAP = {
     'codeforces': CodeforcesScraper,
     'atcoder': AtCoderScraper,
     'luogu': LuoguScraper,
+    'nowcoder': NowcoderScraper,
 }
 
 
@@ -61,7 +63,7 @@ def scrape_all_users():
                     error_count += 1
                 else:
                     success_count += 1
-                _save_result(user.id, platform, result)
+                    _save_result(user.id, platform, result)
             except Exception as e:
                 print(f"[Scraper] Error {platform}/{handle_value}: {e}")
                 error_count += 1
@@ -113,7 +115,8 @@ def scrape_single_user(user_id: int):
         try:
             scraper = scraper_cls(handle_value)
             result = scraper.scrape()
-            _save_result(user_id, platform, result)
+            if not result.get('error'):
+                _save_result(user_id, platform, result)
             print(f"[Scraper] {platform}: {result.get('total_solved', 0)} solved")
         except Exception as e:
             print(f"[Scraper] Error for {platform}: {e}")

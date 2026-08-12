@@ -1,69 +1,71 @@
-"""Nowcoder (牛客) scraper using page DOM parsing."""
+"""Nowcoder (牛客) scraper using problem tracker API.
+
+Endpoint:
+    https://www.nowcoder.com/problem/tracker/ranks?userId={uid}
+
+The user enters their numeric UID (not username), e.g. 654602760.
+The API returns:
+    {"msg":"OK","code":0,"data":{"ranks":[{"count":1205,"name":"..."}]}}
+"""
 
 from typing import Optional
-from bs4 import BeautifulSoup
-from app.scraper.base import AbstractScraper
 
 
-class NowcoderScraper(AbstractScraper):
+class NowcoderScraper:
     PLATFORM_NAME = 'nowcoder'
-    BASE_URL = 'https://ac.nowcoder.com'
+    API_URL = 'https://www.nowcoder.com/problem/tracker/ranks?userId={uid}'
 
-    def fetch_total_solved(self) -> int:
-        """Extract practice problem count from profile page."""
+    def __init__(self, handle: str):
+        self.handle = handle.strip()
+
+    def scrape(self) -> dict:
+        """Fetch total_solved from Nowcoder tracker API.
+
+        Returns a dict with 'total_solved', 'rating', 'category_stats', 'error'.
+        When 'error' is truthy, the orchestrator discards this result to avoid
+        overwriting manual data with zeroes.
+        """
+        import requests
+
+        result = {
+            'total_solved': 0,
+            'rating': None,
+            'category_stats': {},
+            'error': None,
+        }
+
         try:
-            url = f'{self.BASE_URL}/acm/contest/profile/{self.handle}'
-            resp = self._get(url)
-            soup = BeautifulSoup(resp.text, 'lxml')
+            url = self.API_URL.format(uid=self.handle)
+            resp = requests.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.nowcoder.com/',
+            }, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
 
-            # Look for solved/accepted count in stat elements
-            # Common patterns in Nowcoder profile pages:
-            # - A number in a stat card
-            # - Text like "已解决 X 题"
-            text = soup.get_text()
-
-            import re
-            # Try "已解决" pattern
-            match = re.search(r'已解决[：:\s]*(\d+)', text)
-            if match:
-                return int(match.group(1))
-
-            # Try "通过" pattern
-            match = re.search(r'通过[：:\s]*(\d+)', text)
-            if match:
-                return int(match.group(1))
-
-            # Try finding numbers near "AC" or "Solved"
-            match = re.search(r'(\d+)\s*(?:题|Problem|AC)', text)
-            if match:
-                return int(match.group(1))
+            if data.get('code') == 0 and data.get('data', {}).get('ranks'):
+                rank = data['data']['ranks'][0]
+                count = rank.get('count', 0)
+                name = rank.get('name', '')
+                result['total_solved'] = int(count)
+                print(f"[Nowcoder] UID {self.handle} → {name} · {count} 题")
+            else:
+                result['error'] = f"Unexpected response: {data.get('msg', 'unknown')}"
+                print(f"[Nowcoder] UID {self.handle}: {result['error']}")
 
         except Exception as e:
-            print(f"[Nowcoder] Error for handle {self.handle}: {e}")
+            result['error'] = str(e)
+            print(f"[Nowcoder] UID {self.handle}: request failed - {e}")
 
-        return 0
+        return result
+
+    def fetch_total_solved(self) -> int:
+        """Direct call — used for testing."""
+        r = self.scrape()
+        return r['total_solved'] if not r.get('error') else 0
 
     def fetch_category_stats(self) -> dict:
-        """Nowcoder tag data is limited on profile pages.
-
-        The platform groups problems by contest rather than algorithm tags.
-        We return an empty dict for now; if tag data becomes available
-        via contest history parsing, it can be added later.
-        """
         return {}
 
     def fetch_rating(self) -> Optional[int]:
-        """Nowcoder has a rating system; try to extract it."""
-        try:
-            url = f'{self.BASE_URL}/acm/contest/profile/{self.handle}'
-            resp = self._get(url)
-            soup = BeautifulSoup(resp.text, 'lxml')
-            text = soup.get_text()
-
-            import re
-            match = re.search(r'(?:rating|Rating|等级)[：:\s]*(\d+)', text)
-            if match:
-                return int(match.group(1))
-        except Exception:
-            pass
         return None
