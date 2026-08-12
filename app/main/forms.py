@@ -13,7 +13,7 @@ PLATFORMS = [
 ]
 
 # Platforms that can't be auto-scraped — manual count entry
-MANUAL_PLATFORMS = ['leetcode', 'lanqiao', 'nowcoder']
+MANUAL_PLATFORMS = ['leetcode', 'lanqiao']
 
 GRADES = [
     ('', '请选择年级'),
@@ -42,7 +42,6 @@ class PlatformHandleForm(FlaskForm):
     leetcode = StringField('力扣 用户名', validators=[Optional(), Length(max=128)])
     lanqiao = StringField('蓝桥杯 账号', validators=[Optional(), Length(max=128)])
     # Manual counts for non-scrapable platforms
-    nowcoder_count = IntegerField('牛客 手动题量', validators=[Optional(), NumberRange(min=0)])
     leetcode_count = IntegerField('力扣 手动题量', validators=[Optional(), NumberRange(min=0)])
     lanqiao_count = IntegerField('蓝桥杯 手动题量', validators=[Optional(), NumberRange(min=0)])
     submit = SubmitField('保存平台账号')

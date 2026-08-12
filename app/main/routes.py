@@ -75,7 +75,7 @@ def edit_profile():
     handle_form = PlatformHandleForm()
 
     ALL_PLATFORMS = ['luogu', 'nowcoder', 'atcoder', 'codeforces', 'leetcode', 'lanqiao']
-    SCRAPABLE = ['luogu', 'atcoder', 'codeforces']  # nowcoder broken, leetcode/lanqiao manual
+    SCRAPABLE = ['luogu', 'nowcoder', 'atcoder', 'codeforces']  # leetcode/lanqiao manual only
 
     if request.method == 'GET':
         for h in get_handles(current_user.id):
@@ -109,7 +109,7 @@ def edit_profile():
             # Save manual counts for non-scrapable platforms
             from app.models.platform import upsert_scrape_result
             import json
-            for platform in ['nowcoder', 'leetcode', 'lanqiao']:
+            for platform in ['leetcode', 'lanqiao']:
                 count_field = getattr(handle_form, f'{platform}_count')
                 if count_field and count_field.data is not None:
                     upsert_scrape_result(
