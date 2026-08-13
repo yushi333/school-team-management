@@ -49,8 +49,12 @@ class NowcoderScraper:
                 name = rank.get('name', '')
                 result['total_solved'] = int(count)
                 print(f"[Nowcoder] UID {self.handle} → {name} · {count} 题")
+            elif data.get('code') == 0:
+                # API OK but no rank data — UID likely invalid or has no problem record
+                result['error'] = f"API OK but no rank data for this UID"
+                print(f"[Nowcoder] UID {self.handle}: no rank data (invalid UID?)")
             else:
-                result['error'] = f"Unexpected response: {data.get('msg', 'unknown')}"
+                result['error'] = f"API error code {data.get('code')}: {data.get('msg', 'unknown')}"
                 print(f"[Nowcoder] UID {self.handle}: {result['error']}")
 
         except Exception as e:
