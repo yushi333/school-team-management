@@ -74,7 +74,8 @@ def _start_scheduler(app):
                             scrape_all()
                         except Exception as e:
                             print(f"[Scheduler] Error: {e}")
-                scheduler.add_job(job, IntervalTrigger(hours=2), id='scrape_job')
+                from datetime import datetime
+                scheduler.add_job(job, IntervalTrigger(hours=2), id='scrape_job', next_run_time=datetime.now())
                 scheduler.start()
                 print("[Scheduler] Started (every 2 hours)")
         except Exception as e:

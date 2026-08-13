@@ -1,14 +1,19 @@
 import os
+import sys
 
 print(">>> 正在加载，请稍候...", flush=True)
 
 from app import create_app
 
-config_name = os.environ.get('FLASK_ENV', 'development')
+if '--prod' in sys.argv:
+    # Production mode: always use ProdConfig so the scheduler starts
+    config_name = 'production'
+else:
+    config_name = os.environ.get('FLASK_ENV', 'development')
+
 app = create_app(config_name)
 
 if __name__ == '__main__':
-    import sys
     if '--prod' in sys.argv:
         # Production mode with waitress (multi-threaded, stable)
         from waitress import serve
