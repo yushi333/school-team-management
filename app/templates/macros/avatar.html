@@ -1,0 +1,7 @@
+{% macro avatar(avatar_path, display_name, size='sm') -%}
+{%- if avatar_path -%}
+<img src="{{ url_for('static', filename=avatar_path) }}" class="avatar avatar-{{ size }}" alt="{{ display_name or '' }}">
+{%- else -%}
+<span class="avatar-initial avatar-{{ size }}">{{ (display_name or '?')[:1] }}</span>
+{%- endif -%}
+{%- endmacro %}

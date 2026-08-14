@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ recruit.title }} - ACM校队管理系统{% endblock %}
+{% from "macros/avatar.html" import avatar %}
 
 {% block content %}
 <div class="row">
@@ -22,7 +23,7 @@
                 <table class="table table-sm">
                     <tr><td class="text-muted" width="100">比赛类型</td><td>{{ recruit.competition_type }}</td></tr>
                     <tr><td class="text-muted">招募人数</td><td>已加入 {{ member_count }} / {{ recruit.recruit_count }} 人</td></tr>
-                    <tr><td class="text-muted">发布人</td><td>{{ recruit.poster_name or recruit.poster_username }}</td></tr>
+                    <tr><td class="text-muted">发布人</td><td class="d-flex align-items-center gap-2">{{ avatar(recruit.poster_avatar, recruit.poster_name or recruit.poster_username) }}{{ recruit.poster_name or recruit.poster_username }}</td></tr>
                     <tr><td class="text-muted">发布时间</td><td>{{ recruit.created_at[:16] if recruit.created_at else '' }}</td></tr>
                     <tr><td class="text-muted">招募要求</td><td>{{ recruit.requirement or '无' }}</td></tr>
                     {% if recruit.description %}
@@ -72,7 +73,7 @@
                     <tbody>
                         {% for m in members %}
                         <tr>
-                            <td><a href="{{ url_for('main.user_profile', id=m.user_id) }}" class="text-decoration-none">{{ m.real_name or '—' }}</a></td>
+                            <td><a href="{{ url_for('main.user_profile', id=m.user_id) }}" class="text-decoration-none d-inline-flex align-items-center gap-2">{{ avatar(m.avatar_path, m.real_name or m.username) }}{{ m.real_name or '—' }}</a></td>
                             <td>{{ m.username }}</td>
                             <td>{{ m.grade or '—' }}</td>
                             <td>{{ m.joined_at[:16] if m.joined_at else '' }}</td>

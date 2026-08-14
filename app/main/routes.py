@@ -112,6 +112,42 @@ def user_profile(id):
                            handles=handles)
 
 
+@main_bp.route('/profile/avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    file = request.files.get('avatar')
+    if not file or not file.filename:
+        flash('请选择图片文件。', 'warning')
+        return redirect(url_for('main.profile'))
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in {'jpg', 'jpeg', 'png', 'gif', 'webp'}:
+        flash('头像仅支持 jpg / png / gif / webp 格式。', 'danger')
+        return redirect(url_for('main.profile'))
+    data = file.read()
+    if len(data) > 5 * 1024 * 1024:
+        flash('头像文件不能超过 5MB。', 'danger')
+        return redirect(url_for('main.profile'))
+    import os, uuid
+    base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    upload_dir = os.path.join(base, 'app', 'static', 'uploads', 'avatars')
+    os.makedirs(upload_dir, exist_ok=True)
+    saved_name = f"{uuid.uuid4().hex[:12]}.{ext}"
+    with open(os.path.join(upload_dir, saved_name), 'wb') as f:
+        f.write(data)
+    rel_path = f'uploads/avatars/{saved_name}'
+    # 替换头像时清理旧文件
+    if current_user.avatar_path:
+        old = os.path.join(base, 'app', 'static', current_user.avatar_path)
+        if os.path.exists(old):
+            try:
+                os.remove(old)
+            except OSError:
+                pass
+    current_user.update(avatar_path=rel_path)
+    flash('头像已更新！', 'success')
+    return redirect(url_for('main.profile'))
+
+
 @main_bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -177,7 +213,8 @@ def leaderboard():
         # Fallback: compute on the fly
         from app.database import query
         rows = query(
-            "SELECT u.id as user_id, u.username, u.real_name, u.grade, COALESCE(SUM(sr.total_solved),0) as total_solved "
+            "SELECT u.id as user_id, u.username, u.real_name, u.grade, u.avatar_path, "
+            "COALESCE(SUM(sr.total_solved),0) as total_solved "
             "FROM users u LEFT JOIN scrape_results sr ON u.id=sr.user_id "
             "GROUP BY u.id ORDER BY total_solved DESC"
         )

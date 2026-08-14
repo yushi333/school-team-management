@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}用户管理 - 管理后台{% endblock %}
+{% from "macros/avatar.html" import avatar %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,7 +18,7 @@
                 {% for u in users %}
                 <tr>
                     <td>{{ u.username }}</td>
-                    <td>{{ u.real_name or '-' }}</td>
+                    <td class="d-flex align-items-center gap-2">{{ avatar(u.avatar_path, u.real_name or u.username) }}{{ u.real_name or '-' }}</td>
                     <td>{{ u.grade or '-' }}</td>
                     <td><span class="badge bg-{{ 'danger' if u.role == 'admin' else 'secondary' }}">{{ '管理员' if u.role == 'admin' else '成员' }}</span></td>
                     <td>

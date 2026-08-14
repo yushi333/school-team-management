@@ -6,6 +6,7 @@ from app.database import query, execute
 # ---- Team Recruitments ----
 def get_recruitments(wuyu_type=None, order_by='created_at DESC'):
     sql = ("SELECT tr.*, u.real_name as poster_name, u.username as poster_username, "
+           "u.avatar_path as poster_avatar, "
            "(SELECT COUNT(*) FROM recruitment_members rm WHERE rm.recruitment_id=tr.id) as member_count "
            "FROM team_recruitments tr LEFT JOIN users u ON tr.posted_by=u.id")
     params = []
@@ -19,6 +20,7 @@ def get_recruitments(wuyu_type=None, order_by='created_at DESC'):
 def get_recruitment(rid):
     return query(
         "SELECT tr.*, u.real_name as poster_name, u.username as poster_username, "
+        "u.avatar_path as poster_avatar, "
         "(SELECT COUNT(*) FROM recruitment_members rm WHERE rm.recruitment_id=tr.id) as member_count "
         "FROM team_recruitments tr LEFT JOIN users u ON tr.posted_by=u.id WHERE tr.id=?",
         (rid,), one=True)
@@ -52,7 +54,7 @@ def count_recruitments():
 # ---- Recruitment Members ----
 def get_members(recruitment_id):
     return query(
-        "SELECT rm.*, u.username, u.real_name, u.grade FROM recruitment_members rm "
+        "SELECT rm.*, u.username, u.real_name, u.grade, u.avatar_path FROM recruitment_members rm "
         "JOIN users u ON rm.user_id=u.id WHERE rm.recruitment_id=? ORDER BY rm.joined_at ASC",
         (recruitment_id,))
 

@@ -6,7 +6,7 @@ from app.database import query, execute
 # ---- Registrations ----
 def get_registrations(event_id):
     return query(
-        "SELECT r.*, u.username, u.real_name, u.grade FROM registrations r "
+        "SELECT r.*, u.username, u.real_name, u.grade, u.avatar_path FROM registrations r "
         "JOIN users u ON r.user_id=u.id WHERE r.event_id=? ORDER BY r.registered_at ASC",
         (event_id,)
     )
@@ -48,7 +48,7 @@ def get_today_ranking(user_id):
 
 def get_today_rankings():
     today = date.today().isoformat()
-    return query("SELECT dr.*, u.username, u.real_name, u.grade FROM daily_rankings dr JOIN users u ON dr.user_id=u.id WHERE dr.snapshot_date=? ORDER BY dr.rank ASC", (today,))
+    return query("SELECT dr.*, u.username, u.real_name, u.grade, u.avatar_path FROM daily_rankings dr JOIN users u ON dr.user_id=u.id WHERE dr.snapshot_date=? ORDER BY dr.rank ASC", (today,))
 
 
 def recompute_rankings():

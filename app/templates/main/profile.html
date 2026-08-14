@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}个人信息 - ACM校队管理系统{% endblock %}
+{% from "macros/avatar.html" import avatar %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 {% endblock %}
@@ -17,6 +18,14 @@
                 <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>编辑</a>
             </div>
             <div class="card-body">
+                <div class="text-center mb-3">
+                    {{ avatar(current_user.avatar_path, current_user.real_name or current_user.username, 'lg') }}
+                    <form method="POST" action="{{ url_for('main.upload_avatar') }}" enctype="multipart/form-data" class="mt-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="file" name="avatar" accept="image/*" class="form-control form-control-sm mb-2" required>
+                        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-upload me-1"></i>上传头像</button>
+                    </form>
+                </div>
                 <table class="table table-sm mb-0">
                     <tr><td class="text-muted" width="100"><i class="bi bi-person me-2"></i>用户名</td><td><strong>{{ current_user.username }}</strong></td></tr>
                     <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>

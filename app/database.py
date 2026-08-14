@@ -152,6 +152,10 @@ def init_db(app):
         conn.execute("ALTER TABLE awards ADD COLUMN wuyu_type TEXT NOT NULL DEFAULT 'zhiyu'")
     except sqlite3.OperationalError:
         pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN avatar_path TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.commit()
 
 

@@ -178,9 +178,12 @@ def campus_event_list():
 def add_campus_event():
     form = CampusEventForm()
     if form.validate_on_submit():
+        deadline = form.registration_deadline.data
         create_campus_event(
             form.title.data, form.content.data or None, form.location.data or None,
-            form.event_date.data, form.registration_deadline.data, form.is_open.data, current_user.id,
+            form.event_date.data,
+            deadline.strftime('%Y-%m-%dT%H:%M') if deadline else None,
+            form.is_open.data, current_user.id,
             form.wuyu_type.data
         )
         flash('校内活动已发布！', 'success')
@@ -195,12 +198,28 @@ def edit_campus_event(id):
     event = get_campus_event(id)
     if not event:
         from flask import abort; abort(404)
+    # 数据库存的是字符串，转为 date/datetime 对象供表单渲染（兼容旧格式）
+    if event.get('event_date'):
+        try:
+            event['event_date'] = datetime.strptime(event['event_date'], '%Y-%m-%d').date()
+        except ValueError:
+            event['event_date'] = None
+    if event.get('registration_deadline'):
+        deadline_dt = None
+        for fmt in ('%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'):
+            try:
+                deadline_dt = datetime.strptime(event['registration_deadline'], fmt)
+                break
+            except ValueError:
+                pass
+        event['registration_deadline'] = deadline_dt
     form = CampusEventForm(data=event)
     if form.validate_on_submit():
+        deadline = form.registration_deadline.data
         update_campus_event(id,
                             title=form.title.data, content=form.content.data or None,
                             location=form.location.data or None, event_date=form.event_date.data,
-                            registration_deadline=form.registration_deadline.data,
+                            registration_deadline=deadline.strftime('%Y-%m-%dT%H:%M') if deadline else None,
                             is_open=1 if form.is_open.data else 0,
                             wuyu_type=form.wuyu_type.data)
         flash('校内活动已更新！', 'success')

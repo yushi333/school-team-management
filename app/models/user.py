@@ -33,6 +33,10 @@ class User(UserMixin):
         return self._data.get('real_name')
 
     @property
+    def avatar_path(self):
+        return self._data.get('avatar_path')
+
+    @property
     def created_at(self):
         return self._data.get('created_at')
 

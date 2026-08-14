@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}排行榜 - ACM校队管理系统{% endblock %}
+{% from "macros/avatar.html" import avatar %}
 
 {% block content %}
 <div class="page-header">
@@ -32,7 +33,7 @@
                         <span class="text-muted fw-bold">{{ r.rank }}</span>
                         {% endif %}
                     </td>
-                    <td><a href="{{ url_for('main.user_profile', id=r.user_id) }}" class="fw-bold text-decoration-none">{{ r.real_name or r.username }}</a></td>
+                    <td><a href="{{ url_for('main.user_profile', id=r.user_id) }}" class="fw-bold text-decoration-none d-inline-flex align-items-center gap-2">{{ avatar(r.avatar_path, r.real_name or r.username) }}{{ r.real_name or r.username }}</a></td>
                     <td>{{ r.grade or '-' }}</td>
                     <td class="text-end pe-4"><span class="fw-bold fs-5 text-primary">{{ r.total_solved }}</span></td>
                 </tr>

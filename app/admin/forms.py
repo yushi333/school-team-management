@@ -57,6 +57,7 @@ class CampusEventForm(FlaskForm):
     location = StringField('活动地点', validators=[Optional(), Length(max=256)])
     wuyu_type = SelectField('五育类型', choices=WUYU_CHOICES, validators=[DataRequired('请选择五育类型')])
     event_date = DateField('活动日期 (YYYY-MM-DD)', validators=[Optional()], format='%Y-%m-%d')
-    registration_deadline = DateTimeField('报名截止时间 (YYYY-MM-DD HH:MM)', validators=[Optional()], format='%Y-%m-%d %H:%M')
+    registration_deadline = DateTimeField('报名截止时间', validators=[Optional()],
+                                          format=['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S'])
     is_open = BooleanField('开放报名')
     submit = SubmitField('发布')

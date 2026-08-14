@@ -10,6 +10,9 @@ venv/
 # Database
 instance/
 
+# Runtime uploads (avatars, award files)
+app/static/uploads/
+
 # Environment
 .env
 .venv

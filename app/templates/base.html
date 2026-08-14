@@ -1,3 +1,4 @@
+{% from "macros/avatar.html" import avatar %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -61,7 +62,8 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>{{ current_user.real_name or current_user.username }}
+                            {{ avatar(current_user.avatar_path, current_user.real_name or current_user.username) }}
+                            <span class="ms-1">{{ current_user.real_name or current_user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}"><i class="bi bi-pencil me-2"></i>编辑资料</a></li>

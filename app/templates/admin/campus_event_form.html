@@ -30,11 +30,13 @@
                     </div>
                     <div class="mb-3">
                         {{ form.event_date.label(class="form-label") }}
-                        {{ form.event_date(class="form-control", placeholder="2026-01-01") }}
+                        {{ form.event_date(class="form-control", type="date") }}
+                        {% for e in form.event_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                     </div>
                     <div class="mb-3">
                         {{ form.registration_deadline.label(class="form-label") }}
-                        {{ form.registration_deadline(class="form-control", placeholder="2026-01-01 12:00") }}
+                        {{ form.registration_deadline(class="form-control", type="datetime-local") }}
+                        {% for e in form.registration_deadline.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                     </div>
                     <div class="mb-3 form-check">
                         {{ form.is_open(class="form-check-input") }}

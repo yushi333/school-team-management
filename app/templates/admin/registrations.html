@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}报名详情 - 管理后台{% endblock %}
+{% from "macros/avatar.html" import avatar %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,7 +18,7 @@
             <tbody>
                 {% for r in registrations %}
                 <tr>
-                    <td>{{ r.real_name or r.username }}</td>
+                    <td class="d-flex align-items-center gap-2">{{ avatar(r.avatar_path, r.real_name or r.username) }}{{ r.real_name or r.username }}</td>
                     <td>{{ r.grade or '-' }}</td>
                     <td>{{ r.contact_phone or '-' }}</td>
                     <td>{{ r.contact_email or '-' }}</td>
