@@ -40,6 +40,58 @@ class User(UserMixin):
     def created_at(self):
         return self._data.get('created_at')
 
+    @property
+    def email(self):
+        return self._data.get('email')
+
+    @property
+    def student_id(self):
+        return self._data.get('student_id')
+
+    @property
+    def surname_zh(self):
+        return self._data.get('surname_zh')
+
+    @property
+    def given_name_zh(self):
+        return self._data.get('given_name_zh')
+
+    @property
+    def first_name(self):
+        return self._data.get('first_name')
+
+    @property
+    def last_name(self):
+        return self._data.get('last_name')
+
+    @property
+    def gender(self):
+        return self._data.get('gender')
+
+    @property
+    def phone(self):
+        return self._data.get('phone')
+
+    @property
+    def enroll_year(self):
+        return self._data.get('enroll_year')
+
+    @property
+    def department(self):
+        return self._data.get('department')
+
+    @property
+    def major(self):
+        return self._data.get('major')
+
+    @property
+    def grad_year(self):
+        return self._data.get('grad_year')
+
+    @property
+    def tshirt_size(self):
+        return self._data.get('tshirt_size')
+
     def is_admin(self):
         return self.role == 'admin'
 

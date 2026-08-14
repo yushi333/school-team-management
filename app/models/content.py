@@ -31,6 +31,10 @@ def get_online_contests(order_by='start_time ASC'):
     return query(f"SELECT * FROM online_contests ORDER BY {order_by}")
 
 
+def get_online_contest(cid):
+    return query("SELECT * FROM online_contests WHERE id=?", (cid,), one=True)
+
+
 def create_online_contest(title, platform, contest_url, start_time, end_time, description, posted_by,
                           source='manual', platform_contest_id=None):
     return execute(
@@ -68,9 +72,9 @@ def count_online_contests():
 
 
 def cleanup_old_contests():
-    """Delete auto-scraped contests that ended more than 3 days ago."""
+    """Delete auto-scraped contests whose end time has passed. Manual contests untouched."""
     execute(
-        "DELETE FROM online_contests WHERE source='auto' AND end_time IS NOT NULL AND end_time < datetime('now','-3 days')"
+        "DELETE FROM online_contests WHERE source='auto' AND end_time IS NOT NULL AND end_time < datetime('now')"
     )
 
 
@@ -117,10 +121,15 @@ def get_award(aid):
     return query("SELECT a.*, u.real_name as uploader_name, u.username as uploader_username FROM awards a LEFT JOIN users u ON a.uploaded_by=u.id WHERE a.id=?", (aid,), one=True)
 
 
-def create_award(title, description, file_path, file_type, original_filename, uploaded_by, wuyu_type='zhiyu'):
+def get_award_years():
+    return [r['award_year'] for r in query(
+        "SELECT DISTINCT award_year FROM awards WHERE award_year IS NOT NULL ORDER BY award_year DESC")]
+
+
+def create_award(title, description, file_path, file_type, original_filename, uploaded_by, wuyu_type='zhiyu', award_year=None):
     return execute(
-        "INSERT INTO awards (title, description, file_path, file_type, original_filename, wuyu_type, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?,?)",
-        (title, description, file_path, file_type, original_filename, wuyu_type, uploaded_by, datetime.utcnow())
+        "INSERT INTO awards (title, description, file_path, file_type, original_filename, wuyu_type, award_year, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+        (title, description, file_path, file_type, original_filename, wuyu_type, award_year, uploaded_by, datetime.utcnow())
     )
 
 

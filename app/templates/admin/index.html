@@ -68,6 +68,15 @@
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <i class="bi bi-folder2-open display-4 text-primary"></i>
+                <h4>{{ doc_file_count }}</h4>
+                <p class="text-muted mb-0">资料库文件</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row g-3 mt-2">
@@ -88,6 +97,9 @@
     </div>
     <div class="col-md-4">
         <a href="{{ url_for('admin.award_list') }}" class="btn btn-outline-success w-100 p-3"><i class="bi bi-trophy"></i> 获奖材料管理</a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin.documents') }}" class="btn btn-outline-primary w-100 p-3"><i class="bi bi-folder2-open"></i> 资料库管理</a>
     </div>
 </div>
 {% endblock %}

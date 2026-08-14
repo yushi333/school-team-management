@@ -65,7 +65,7 @@
                 {% if recent_contests %}
                 <div class="list-group list-group-flush">
                     {% for c in recent_contests %}
-                    <a href="{{ url_for('main.online_contests') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('main.online_contest_detail', id=c.id) }}" class="list-group-item list-group-item-action">
                         <div class="d-flex justify-content-between align-items-center">
                             <strong>{{ c.title }}</strong>
                             <span class="badge bg-secondary">{{ {'luogu':'洛谷','nowcoder':'牛客','codeforces':'CF','atcoder':'AtCoder','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(c.platform, c.platform) }}</span>

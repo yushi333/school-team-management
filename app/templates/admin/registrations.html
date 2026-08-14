@@ -18,7 +18,7 @@
             <tbody>
                 {% for r in registrations %}
                 <tr>
-                    <td class="d-flex align-items-center gap-2">{{ avatar(r.avatar_path, r.real_name or r.username) }}{{ r.real_name or r.username }}</td>
+                    <td><span class="d-inline-flex align-items-center gap-2">{{ avatar(r.avatar_path, r.real_name or r.username) }}{{ r.real_name or r.username }}</span></td>
                     <td>{{ r.grade or '-' }}</td>
                     <td>{{ r.contact_phone or '-' }}</td>
                     <td>{{ r.contact_email or '-' }}</td>

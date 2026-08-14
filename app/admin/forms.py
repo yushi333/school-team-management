@@ -1,7 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, DateField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, Length, Optional, URL
+from wtforms.validators import DataRequired, Length, Optional, URL, Email
 from app.constants import WUYU_CHOICES
+
+STUDY_YEARS = [('', '请选择')] + [(f'{y}级', f'{y}级') for y in range(2022, 2031)] + [('研究生', '研究生')]
+TSHIRT_SIZES = [('', '请选择'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL'), ('XXL', 'XXL'), ('XXXL', 'XXXL')]
 
 
 class UserCreateForm(FlaskForm):
@@ -22,6 +25,19 @@ class UserEditForm(FlaskForm):
         ('', '请选择'), ('2022级', '2022级'), ('2023级', '2023级'), ('2024级', '2024级'),
         ('2025级', '2025级'), ('2026级', '2026级'), ('2027级', '2027级'), ('2028级', '2028级'), ('研究生', '研究生'),
     ])
+    email = StringField('邮箱', validators=[Optional(), Email(message='请输入有效的邮箱地址'), Length(max=128)])
+    student_id = StringField('学号', validators=[Optional(), Length(max=32)])
+    surname_zh = StringField('姓（中文）', validators=[Optional(), Length(max=32)])
+    given_name_zh = StringField('名（中文）', validators=[Optional(), Length(max=32)])
+    first_name = StringField('名（英文）', validators=[Optional(), Length(max=64)])
+    last_name = StringField('姓（英文）', validators=[Optional(), Length(max=64)])
+    gender = SelectField('性别', choices=[('', '请选择'), ('m', '男'), ('f', '女')], validators=[Optional()])
+    phone = StringField('手机号', validators=[Optional(), Length(max=32)])
+    enroll_year = SelectField('入学年份', choices=STUDY_YEARS, validators=[Optional()])
+    department = StringField('院系', validators=[Optional(), Length(max=128)])
+    major = StringField('专业', validators=[Optional(), Length(max=128)])
+    grad_year = SelectField('毕业年份', choices=STUDY_YEARS, validators=[Optional()])
+    tshirt_size = SelectField('T恤尺码', choices=TSHIRT_SIZES, validators=[Optional()])
     role = SelectField('角色', choices=[('member', '普通成员'), ('admin', '管理员')])
     submit = SubmitField('保存修改')
 

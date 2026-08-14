@@ -19,6 +19,60 @@
                         {{ profile_form.grade.label(class="form-label") }}
                         {{ profile_form.grade(class="form-select") }}
                     </div>
+                    <div class="row g-2">
+                        <div class="col-6 mb-2">
+                            {{ profile_form.email.label(class="form-label") }}
+                            {{ profile_form.email(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.student_id.label(class="form-label") }}
+                            {{ profile_form.student_id(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.surname_zh.label(class="form-label") }}
+                            {{ profile_form.surname_zh(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.given_name_zh.label(class="form-label") }}
+                            {{ profile_form.given_name_zh(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.first_name.label(class="form-label") }}
+                            {{ profile_form.first_name(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.last_name.label(class="form-label") }}
+                            {{ profile_form.last_name(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.gender.label(class="form-label") }}
+                            {{ profile_form.gender(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.phone.label(class="form-label") }}
+                            {{ profile_form.phone(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.enroll_year.label(class="form-label") }}
+                            {{ profile_form.enroll_year(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.grad_year.label(class="form-label") }}
+                            {{ profile_form.grad_year(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.department.label(class="form-label") }}
+                            {{ profile_form.department(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.major.label(class="form-label") }}
+                            {{ profile_form.major(class="form-control", placeholder="选填") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ profile_form.tshirt_size.label(class="form-label") }}
+                            {{ profile_form.tshirt_size(class="form-select") }}
+                        </div>
+                    </div>
                     <button type="submit" name="submit_profile" class="btn btn-primary">保存个人信息</button>
                 </form>
             </div>

@@ -18,7 +18,7 @@
                 {% for u in users %}
                 <tr>
                     <td>{{ u.username }}</td>
-                    <td class="d-flex align-items-center gap-2">{{ avatar(u.avatar_path, u.real_name or u.username) }}{{ u.real_name or '-' }}</td>
+                    <td><span class="d-inline-flex align-items-center gap-2">{{ avatar(u.avatar_path, u.real_name or u.username) }}<a href="{{ url_for('admin.user_detail', id=u.id) }}">{{ u.real_name or '-' }}</a></span></td>
                     <td>{{ u.grade or '-' }}</td>
                     <td><span class="badge bg-{{ 'danger' if u.role == 'admin' else 'secondary' }}">{{ '管理员' if u.role == 'admin' else '成员' }}</span></td>
                     <td>

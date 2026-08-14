@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ contest.title }} - ACM校队管理系统{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('main.online_contests') }}" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left me-1"></i>返回线上比赛</a>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ contest.title }}</h5>
+                <span>
+                    <span class="badge badge-{{ contest.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','codeforces':'Codeforces','atcoder':'AtCoder','leetcode':'力扣','lanqiao':'蓝桥杯','other':'其他'}.get(contest.platform, contest.platform) }}</span>
+                    {% if contest.source == 'auto' %}<span class="badge bg-success ms-1">🤖 自动</span>{% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if contest.description %}
+                <p style="white-space: pre-wrap">{{ contest.description }}</p>
+                <hr>
+                {% endif %}
+                <table class="table table-sm">
+                    <tr><td class="text-muted" width="100">开始时间</td><td>{{ contest.start_time[:16] if contest.start_time else '待定' }}</td></tr>
+                    <tr><td class="text-muted">结束时间</td><td>{{ contest.end_time[:16] if contest.end_time else '待定' }}</td></tr>
+                    <tr><td class="text-muted">来源</td><td>{{ '系统自动爬取' if contest.source == 'auto' else '手动发布' }}</td></tr>
+                    <tr><td class="text-muted">发布时间</td><td>{{ contest.created_at[:16] if contest.created_at else '' }}</td></tr>
+                </table>
+                {% if contest.contest_url %}
+                <a href="{{ contest.contest_url }}" target="_blank" class="btn btn-primary">前往比赛 <i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

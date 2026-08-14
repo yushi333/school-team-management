@@ -443,6 +443,20 @@ footer {
     border-top-color: #334155;
 }
 
+/* ---- Avatar crop modal ---- */
+.crop-preview {
+    max-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+    border-radius: .5rem;
+}
+.crop-preview img {
+    max-width: 100%;
+    display: block;
+}
+
 /* ---- Breadcrumb ---- */
 [data-bs-theme="dark"] .breadcrumb-item a {
     color: #60a5fa;

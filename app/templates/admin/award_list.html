@@ -12,13 +12,14 @@
         {% if awards %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>标题</th><th>五育</th><th>类型</th><th>文件名</th><th>时间</th><th>操作</th></tr>
+                <tr><th>标题</th><th>五育</th><th>年份</th><th>类型</th><th>文件名</th><th>时间</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for a in awards %}
                 <tr>
                     <td>{{ a.title }}</td>
                     <td><span class="badge badge-{{ a.wuyu_type }}">{{ WUYU_LABELS.get(a.wuyu_type, a.wuyu_type) }}</span></td>
+                    <td>{{ a.award_year or '-' }}</td>
                     <td>
                         {% if a.file_type == 'image' %}<span class="badge bg-info">图片</span>
                         {% elif a.file_type == 'document' %}<span class="badge bg-warning">文档</span>

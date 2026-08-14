@@ -132,6 +132,22 @@ def init_db(app):
             UNIQUE(recruitment_id, user_id)
         );
 
+        CREATE TABLE IF NOT EXISTS doc_folders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS doc_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            folder_id INTEGER NOT NULL REFERENCES doc_folders(id) ON DELETE CASCADE,
+            original_filename TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            file_size INTEGER DEFAULT 0,
+            uploaded_by INTEGER REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         PRAGMA foreign_keys = ON;
         PRAGMA journal_mode = WAL;
     ''')
@@ -156,6 +172,22 @@ def init_db(app):
         conn.execute("ALTER TABLE users ADD COLUMN avatar_path TEXT")
     except sqlite3.OperationalError:
         pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE awards ADD COLUMN award_year INTEGER")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    for col in ('email', 'student_id', 'surname_zh', 'given_name_zh', 'first_name',
+                'last_name', 'gender', 'phone', 'enroll_year', 'department',
+                'major', 'grad_year', 'tshirt_size'):
+        try:
+            conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    # Preset document library folders (idempotent)
+    for name in ('财务报表', '年审资料', '星级评比'):
+        conn.execute(
+            "INSERT INTO doc_folders (name) SELECT ? WHERE NOT EXISTS (SELECT 1 FROM doc_folders WHERE name=?)",
+            (name, name))
     conn.commit()
 
 

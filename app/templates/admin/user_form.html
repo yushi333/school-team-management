@@ -32,6 +32,62 @@
                         {{ form.grade.label(class="form-label") }}
                         {{ form.grade(class="form-select") }}
                     </div>
+                    {% if edit_mode %}
+                    <div class="row g-2">
+                        <div class="col-6 mb-2">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.student_id.label(class="form-label") }}
+                            {{ form.student_id(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.surname_zh.label(class="form-label") }}
+                            {{ form.surname_zh(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.given_name_zh.label(class="form-label") }}
+                            {{ form.given_name_zh(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.first_name.label(class="form-label") }}
+                            {{ form.first_name(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.last_name.label(class="form-label") }}
+                            {{ form.last_name(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.gender.label(class="form-label") }}
+                            {{ form.gender(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.enroll_year.label(class="form-label") }}
+                            {{ form.enroll_year(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.grad_year.label(class="form-label") }}
+                            {{ form.grad_year(class="form-select") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.major.label(class="form-label") }}
+                            {{ form.major(class="form-control") }}
+                        </div>
+                        <div class="col-6 mb-2">
+                            {{ form.tshirt_size.label(class="form-label") }}
+                            {{ form.tshirt_size(class="form-select") }}
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="mb-3">
                         {{ form.role.label(class="form-label") }}
                         {{ form.role(class="form-select") }}

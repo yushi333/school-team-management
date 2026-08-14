@@ -23,7 +23,7 @@
                 <table class="table table-sm">
                     <tr><td class="text-muted" width="100">比赛类型</td><td>{{ recruit.competition_type }}</td></tr>
                     <tr><td class="text-muted">招募人数</td><td>已加入 {{ member_count }} / {{ recruit.recruit_count }} 人</td></tr>
-                    <tr><td class="text-muted">发布人</td><td class="d-flex align-items-center gap-2">{{ avatar(recruit.poster_avatar, recruit.poster_name or recruit.poster_username) }}{{ recruit.poster_name or recruit.poster_username }}</td></tr>
+                    <tr><td class="text-muted">发布人</td><td><span class="d-inline-flex align-items-center gap-2">{{ avatar(recruit.poster_avatar, recruit.poster_name or recruit.poster_username) }}{{ recruit.poster_name or recruit.poster_username }}</span></td></tr>
                     <tr><td class="text-muted">发布时间</td><td>{{ recruit.created_at[:16] if recruit.created_at else '' }}</td></tr>
                     <tr><td class="text-muted">招募要求</td><td>{{ recruit.requirement or '无' }}</td></tr>
                     {% if recruit.description %}

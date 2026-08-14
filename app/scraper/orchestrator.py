@@ -88,10 +88,11 @@ def scrape_contests():
                 description=c.get('description', ''),
             )
             saved += 1
-        cleanup_old_contests()
         print(f"[Scraper] Contests saved: {saved}")
     except Exception as e:
         print(f"[Scraper] Contest scraping error: {e}")
+    finally:
+        cleanup_old_contests()  # always delete expired auto contests, even if scraping failed
 
 
 def scrape_single_user(user_id: int):

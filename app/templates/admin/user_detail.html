@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}用户详情: {{ target_user.real_name or target_user.username }} - 管理后台{% endblock %}
+{% from "macros/avatar.html" import avatar %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 d-flex align-items-center gap-2">{{ avatar(target_user.avatar_path, target_user.real_name or target_user.username, 'md') }}{{ target_user.real_name or target_user.username }}</h4>
+    <span>
+        <a href="{{ url_for('admin.edit_user', id=target_user.id) }}" class="btn btn-primary btn-sm"><i class="bi bi-pencil me-1"></i>编辑</a>
+        <a href="{{ url_for('admin.user_list') }}" class="btn btn-outline-secondary btn-sm">返回列表</a>
+    </span>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-person-badge me-2"></i>账号信息</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted" width="110">用户名</td><td><strong>{{ target_user.username }}</strong></td></tr>
+                    <tr><td class="text-muted">角色</td><td><span class="badge bg-{{ 'danger' if target_user.role == 'admin' else 'secondary' }}">{{ '管理员' if target_user.role == 'admin' else '成员' }}</span></td></tr>
+                    <tr><td class="text-muted">注册时间</td><td>{{ target_user.created_at[:16] if target_user.created_at else '' }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-info-circle me-2"></i>基本信息</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted" width="110">姓名</td><td>{{ target_user.real_name or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">年级</td><td>{{ target_user.grade or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">学号</td><td>{{ target_user.student_id or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">邮箱</td><td>{{ target_user.email or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">手机号</td><td>{{ target_user.phone or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">性别</td><td>{% if target_user.gender %}{{ '男' if target_user.gender == 'm' else '女' }}{% else %}未填写{% endif %}</td></tr>
+                    <tr><td class="text-muted">中文姓名</td><td>{{ (target_user.surname_zh or '') }}{{ (target_user.given_name_zh or '') }}{% if not target_user.surname_zh and not target_user.given_name_zh %}未填写{% endif %}</td></tr>
+                    <tr><td class="text-muted">英文姓名</td><td>{{ (target_user.first_name or '') }} {{ (target_user.last_name or '') }}{% if not target_user.first_name and not target_user.last_name %}未填写{% endif %}</td></tr>
+                    <tr><td class="text-muted">入学年份</td><td>{{ target_user.enroll_year or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">毕业年份</td><td>{{ target_user.grad_year or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">院系</td><td>{{ target_user.department or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">专业</td><td>{{ target_user.major or '未填写' }}</td></tr>
+                    <tr><td class="text-muted">T恤尺码</td><td>{{ target_user.tshirt_size or '未填写' }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-link-45deg me-2"></i>平台账号</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted"><span class="badge badge-luogu me-2">●</span>洛谷</td><td>{{ handles.get('luogu', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-nowcoder me-2">●</span>牛客</td><td>{{ handles.get('nowcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-atcoder me-2">●</span>AtCoder</td><td>{{ handles.get('atcoder', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-codeforces me-2">●</span>Codeforces</td><td>{{ handles.get('codeforces', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-leetcode me-2">●</span>力扣</td><td>{{ handles.get('leetcode', '-') }}</td></tr>
+                    <tr><td class="text-muted"><span class="badge badge-lanqiao me-2">●</span>蓝桥杯</td><td>{{ handles.get('lanqiao', '-') }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>刷题数据</div>
+            <div class="card-body p-0">
+                {% if scrape_results %}
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th class="ps-3">平台</th><th>已解决</th><th>评分</th><th class="pe-3">最后更新</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for r in scrape_results %}
+                        <tr>
+                            <td class="ps-3"><span class="badge badge-{{ r.platform }}">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'Codeforces','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(r.platform, r.platform) }}</span></td>
+                            <td>{{ r.total_solved }}</td>
+                            <td>{{ r.rating or '-' }}</td>
+                            <td class="pe-3"><small>{{ r.scraped_at[:16] if r.scraped_at else '-' }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4"><p class="text-muted mb-0">该用户暂无刷题数据。</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

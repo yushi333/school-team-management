@@ -24,7 +24,7 @@
                         {% elif r.member_count >= r.recruit_count %}<span class="badge bg-danger">已满员</span>
                         {% else %}<span class="badge bg-success">招募中</span>{% endif %}
                     </td>
-                    <td class="d-flex align-items-center gap-2">{{ avatar(r.poster_avatar, r.poster_name or r.poster_username) }}{{ r.poster_name or r.poster_username }}</td>
+                    <td><span class="d-inline-flex align-items-center gap-2">{{ avatar(r.poster_avatar, r.poster_name or r.poster_username) }}{{ r.poster_name or r.poster_username }}</span></td>
                     <td>
                         <a href="{{ url_for('main.recruitment_detail', id=r.id) }}" class="btn btn-sm btn-outline-primary">详情</a>
                         <form method="POST" action="{{ url_for('admin.admin_toggle_recruitment', id=r.id) }}" class="d-inline">

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}上传获奖材料 - 管理后台{% endblock %}
+{% block title %}上传获奖材料 - ACM校队管理系统{% endblock %}
 
 {% block content %}
-<h4 class="mb-4"><i class="bi bi-plus-lg"></i> 上传获奖材料</h4>
+<h3 class="mb-4"><i class="bi bi-plus-lg"></i> 上传获奖材料</h3>
 
 <div class="row">
     <div class="col-md-6">
@@ -29,8 +29,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">获奖年份</label>
-                        <select name="year" class="form-select">
-                            <option value="">未选择</option>
+                        <select name="year" class="form-select" required>
+                            <option value="">请选择获奖年份</option>
                             {% for y in years %}
                             <option value="{{ y }}" {% if y == default_year %}selected{% endif %}>{{ y }}年</option>
                             {% endfor %}
@@ -42,7 +42,7 @@
                         <div class="form-text">支持图片和文档格式（jpg, png, gif, pdf, doc, docx, xls, xlsx, ppt, pptx, zip 等）</div>
                     </div>
                     <button type="submit" class="btn btn-primary">上传</button>
-                    <a href="{{ url_for('admin.award_list') }}" class="btn btn-secondary">返回</a>
+                    <a href="{{ url_for('main.awards') }}" class="btn btn-secondary">返回</a>
                 </form>
             </div>
         </div>

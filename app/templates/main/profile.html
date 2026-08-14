@@ -3,6 +3,8 @@
 {% from "macros/avatar.html" import avatar %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,16 +22,45 @@
             <div class="card-body">
                 <div class="text-center mb-3">
                     {{ avatar(current_user.avatar_path, current_user.real_name or current_user.username, 'lg') }}
-                    <form method="POST" action="{{ url_for('main.upload_avatar') }}" enctype="multipart/form-data" class="mt-3">
+                    <form method="POST" action="{{ url_for('main.upload_avatar') }}" enctype="multipart/form-data" id="avatar-form" class="mt-3">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="file" name="avatar" accept="image/*" class="form-control form-control-sm mb-2" required>
-                        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-upload me-1"></i>上传头像</button>
+                        <input type="hidden" name="cropped_data" id="cropped-data">
+                        <input type="file" name="avatar" id="avatar-file" accept="image/jpg,image/jpeg,image/png,image/gif,image/webp" class="form-control form-control-sm mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="avatar-crop-btn"><i class="bi bi-scissors me-1"></i>裁剪并上传</button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">直接上传原图</button>
                     </form>
                 </div>
                 <table class="table table-sm mb-0">
                     <tr><td class="text-muted" width="100"><i class="bi bi-person me-2"></i>用户名</td><td><strong>{{ current_user.username }}</strong></td></tr>
                     <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
                     <tr><td class="text-muted"><i class="bi bi-mortarboard me-2"></i>年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
+                    {% if current_user.student_id %}
+                    <tr><td class="text-muted"><i class="bi bi-hash me-2"></i>学号</td><td>{{ current_user.student_id }}</td></tr>
+                    {% endif %}
+                    {% if current_user.email %}
+                    <tr><td class="text-muted"><i class="bi bi-envelope me-2"></i>邮箱</td><td>{{ current_user.email }}</td></tr>
+                    {% endif %}
+                    {% if current_user.phone %}
+                    <tr><td class="text-muted"><i class="bi bi-telephone me-2"></i>手机号</td><td>{{ current_user.phone }}</td></tr>
+                    {% endif %}
+                    {% if current_user.gender %}
+                    <tr><td class="text-muted"><i class="bi bi-gender-ambiguous me-2"></i>性别</td><td>{{ '男' if current_user.gender == 'm' else '女' }}</td></tr>
+                    {% endif %}
+                    {% if current_user.enroll_year %}
+                    <tr><td class="text-muted"><i class="bi bi-calendar2-check me-2"></i>入学年份</td><td>{{ current_user.enroll_year }}</td></tr>
+                    {% endif %}
+                    {% if current_user.grad_year %}
+                    <tr><td class="text-muted"><i class="bi bi-calendar2-x me-2"></i>毕业年份</td><td>{{ current_user.grad_year }}</td></tr>
+                    {% endif %}
+                    {% if current_user.department %}
+                    <tr><td class="text-muted"><i class="bi bi-building me-2"></i>院系</td><td>{{ current_user.department }}</td></tr>
+                    {% endif %}
+                    {% if current_user.major %}
+                    <tr><td class="text-muted"><i class="bi bi-journal-text me-2"></i>专业</td><td>{{ current_user.major }}</td></tr>
+                    {% endif %}
+                    {% if current_user.tshirt_size %}
+                    <tr><td class="text-muted"><i class="bi bi-tag me-2"></i>T恤大小</td><td>{{ current_user.tshirt_size }}</td></tr>
+                    {% endif %}
                 </table>
             </div>
         </div>
@@ -113,9 +144,28 @@
     {% endif %}
 </div>
 {% endif %}
+<!-- 头像裁剪弹窗 -->
+<div class="modal fade" id="cropModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">裁剪头像</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="crop-preview"><img id="crop-image" alt=""></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="crop-confirm">裁剪并上传</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/avatar_crop.js') }}"></script>
 {% if platform_data and platform_data|sum > 0 %}
 <script>
 const isDark = document.documentElement.hasAttribute('data-bs-theme');

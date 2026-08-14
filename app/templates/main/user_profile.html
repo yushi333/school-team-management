@@ -23,7 +23,9 @@
                 <table class="table table-sm mb-0">
                     <tr><td class="text-muted" width="100"><i class="bi bi-person me-2"></i>用户名</td><td><strong>{{ target_user.username }}</strong></td></tr>
                     <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ target_user.real_name or '未填写' }}</td></tr>
-                    <tr><td class="text-muted"><i class="bi bi-mortarboard me-2"></i>年级</td><td>{{ target_user.grade or '未填写' }}</td></tr>
+                    {% if target_user.student_id %}
+                    <tr><td class="text-muted"><i class="bi bi-hash me-2"></i>学号</td><td>{{ target_user.student_id }}</td></tr>
+                    {% endif %}
                     <tr><td class="text-muted"><i class="bi bi-fire me-2"></i>总题量</td><td><strong class="fs-5 text-primary">{{ total_solved }}</strong></td></tr>
                 </table>
             </div>

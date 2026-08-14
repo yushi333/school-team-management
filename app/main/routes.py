@@ -1,19 +1,31 @@
 from datetime import datetime
+import base64
+import os
+import re
 import sqlite3
 import threading
+import uuid
 from flask import render_template, redirect, url_for, flash, request, current_app, abort
 from flask_login import login_required, current_user
 from app.main import main_bp
 from app.main.forms import ProfileForm, PlatformHandleForm, RecruitmentForm
 from app.models.user import User
 from app.models.platform import get_scrape_results, set_handle, delete_handle, get_handles
-from app.models.content import (get_tutorials, get_tutorial, get_online_contests, get_campus_events,
-                                get_campus_event, get_awards)
+from app.models.content import (get_tutorials, get_tutorial, get_online_contests, get_online_contest,
+                                get_campus_events, get_campus_event,
+                                get_awards, get_award, create_award, delete_award, get_award_years)
 from app.models.registration import (get_registration, create_registration, delete_registration,
                                      get_today_ranking, get_today_rankings)
 from app.models.recruitment import (get_recruitments, get_recruitment, create_recruitment,
                                     update_recruitment, delete_recruitment, get_members,
                                     get_member, join_recruitment, leave_recruitment, count_members)
+from app.constants import WUYU_LABELS
+from app.services.upload import save_upload_file, classify_file_type
+
+
+def _clean_optional(v):
+    """Normalize optional form values: empty string -> None."""
+    return (v or '').strip() or None
 
 
 @main_bp.route('/')
@@ -112,22 +124,8 @@ def user_profile(id):
                            handles=handles)
 
 
-@main_bp.route('/profile/avatar', methods=['POST'])
-@login_required
-def upload_avatar():
-    file = request.files.get('avatar')
-    if not file or not file.filename:
-        flash('请选择图片文件。', 'warning')
-        return redirect(url_for('main.profile'))
-    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
-    if ext not in {'jpg', 'jpeg', 'png', 'gif', 'webp'}:
-        flash('头像仅支持 jpg / png / gif / webp 格式。', 'danger')
-        return redirect(url_for('main.profile'))
-    data = file.read()
-    if len(data) > 5 * 1024 * 1024:
-        flash('头像文件不能超过 5MB。', 'danger')
-        return redirect(url_for('main.profile'))
-    import os, uuid
+def _save_avatar_bytes(data, ext):
+    """Save avatar bytes, delete the old avatar file, update the user row."""
     base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     upload_dir = os.path.join(base, 'app', 'static', 'uploads', 'avatars')
     os.makedirs(upload_dir, exist_ok=True)
@@ -144,6 +142,47 @@ def upload_avatar():
             except OSError:
                 pass
     current_user.update(avatar_path=rel_path)
+
+
+@main_bp.route('/profile/avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    # 裁剪后的 dataURL 优先
+    cropped_data = request.form.get('cropped_data', '')
+    if cropped_data:
+        if not cropped_data.startswith('data:image/') or ';base64,' not in cropped_data:
+            flash('裁剪数据无效。', 'danger')
+            return redirect(url_for('main.profile'))
+        header, b64 = cropped_data.split(',', 1)
+        fmt = header.split(';')[0].split('/')[1]
+        if fmt not in ('png', 'jpeg', 'webp'):
+            flash('头像仅支持 jpg / png / webp 格式。', 'danger')
+            return redirect(url_for('main.profile'))
+        try:
+            raw = base64.b64decode(b64 + '=' * (-len(b64) % 4))
+        except Exception:
+            flash('裁剪数据无效。', 'danger')
+            return redirect(url_for('main.profile'))
+        if len(raw) > 5 * 1024 * 1024:
+            flash('头像文件不能超过 5MB。', 'danger')
+            return redirect(url_for('main.profile'))
+        _save_avatar_bytes(raw, 'jpg' if fmt == 'jpeg' else fmt)
+        flash('头像已更新！', 'success')
+        return redirect(url_for('main.profile'))
+
+    file = request.files.get('avatar')
+    if not file or not file.filename:
+        flash('请选择图片文件。', 'warning')
+        return redirect(url_for('main.profile'))
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in {'jpg', 'jpeg', 'png', 'gif', 'webp'}:
+        flash('头像仅支持 jpg / png / gif / webp 格式。', 'danger')
+        return redirect(url_for('main.profile'))
+    data = file.read()
+    if len(data) > 5 * 1024 * 1024:
+        flash('头像文件不能超过 5MB。', 'danger')
+        return redirect(url_for('main.profile'))
+    _save_avatar_bytes(data, ext)
     flash('头像已更新！', 'success')
     return redirect(url_for('main.profile'))
 
@@ -174,7 +213,20 @@ def edit_profile():
         if 'submit_profile' in request.form and profile_form.validate_on_submit():
             current_user.update(
                 real_name=profile_form.real_name.data,
-                grade=profile_form.grade.data
+                grade=profile_form.grade.data,
+                email=_clean_optional(profile_form.email.data),
+                student_id=_clean_optional(profile_form.student_id.data),
+                surname_zh=_clean_optional(profile_form.surname_zh.data),
+                given_name_zh=_clean_optional(profile_form.given_name_zh.data),
+                first_name=_clean_optional(profile_form.first_name.data),
+                last_name=_clean_optional(profile_form.last_name.data),
+                gender=_clean_optional(profile_form.gender.data),
+                phone=_clean_optional(profile_form.phone.data),
+                enroll_year=_clean_optional(profile_form.enroll_year.data),
+                department=_clean_optional(profile_form.department.data),
+                major=_clean_optional(profile_form.major.data),
+                grad_year=_clean_optional(profile_form.grad_year.data),
+                tshirt_size=_clean_optional(profile_form.tshirt_size.data),
             )
             flash('个人信息已更新。', 'success')
             return redirect(url_for('main.profile'))
@@ -243,6 +295,15 @@ def tutorial_detail(id):
 @login_required
 def online_contests():
     return render_template('main/online_contests.html', contests=get_online_contests())
+
+
+@main_bp.route('/online-contests/<int:id>')
+@login_required
+def online_contest_detail(id):
+    contest = get_online_contest(id)
+    if not contest:
+        abort(404)
+    return render_template('main/online_contest_detail.html', contest=contest)
 
 
 @main_bp.route('/campus-events')
@@ -315,10 +376,65 @@ def cancel_registration(id):
 @login_required
 def awards():
     wuyu = request.args.get('wuyu')
+    year = request.args.get('year', type=int)
     award_list = get_awards()
     if wuyu:
         award_list = [a for a in award_list if a.get('wuyu_type') == wuyu]
-    return render_template('main/awards.html', awards=award_list, current_filter=wuyu)
+    if year:
+        award_list = [a for a in award_list if a.get('award_year') == year]
+    return render_template('main/awards.html', awards=award_list,
+                           current_filter=wuyu, current_year=year, years=get_award_years())
+
+
+@main_bp.route('/awards/upload', methods=['GET', 'POST'])
+@login_required
+def upload_award_route():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        wuyu_type = request.form.get('wuyu_type', '').strip()
+        year_raw = request.form.get('year', '').strip()
+        file = request.files.get('file')
+        if not title:
+            flash('请输入标题。', 'danger')
+            return redirect(url_for('main.upload_award_route'))
+        if wuyu_type not in WUYU_LABELS:
+            flash('请选择五育类型。', 'danger')
+            return redirect(url_for('main.upload_award_route'))
+        if not re.fullmatch(r'(19|20)\d{2}', year_raw):
+            flash('请选择获奖年份。', 'danger')
+            return redirect(url_for('main.upload_award_route'))
+        award_year = int(year_raw)
+        if not file or not file.filename:
+            flash('请选择文件。', 'danger')
+            return redirect(url_for('main.upload_award_route'))
+        rel_path, original, _ = save_upload_file(file, 'awards')
+        create_award(title, description or None, rel_path, classify_file_type(original), original,
+                     current_user.id, wuyu_type, award_year)
+        flash('获奖材料已上传！', 'success')
+        return redirect(url_for('main.awards'))
+    current_year = datetime.now().year
+    return render_template('main/award_form.html',
+                           years=range(current_year, 2016, -1), default_year=current_year)
+
+
+@main_bp.route('/awards/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_award_member_route(id):
+    a = get_award(id)
+    if not a:
+        abort(404)
+    if not (current_user.is_admin() or a['uploaded_by'] == current_user.id):
+        flash('您没有权限删除该材料。', 'danger')
+        return redirect(url_for('main.awards'))
+    if a.get('file_path'):
+        full = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                            'app', 'static', a['file_path'])
+        if os.path.exists(full):
+            os.remove(full)
+    delete_award(id)
+    flash('获奖材料已删除。', 'success')
+    return redirect(url_for('main.awards'))
 
 
 # ---- Team Recruitments ----
