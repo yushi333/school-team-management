@@ -72,6 +72,46 @@ def profile():
                            handles=handles)
 
 
+@main_bp.route('/user/<int:id>')
+@login_required
+def user_profile(id):
+    target = User.find_by_id(id)
+    if not target:
+        abort(404)
+    scrape_results = get_scrape_results(id)
+    total_solved = sum(r['total_solved'] for r in scrape_results)
+    ranking = get_today_ranking(id)
+    platform_labels = []
+    platform_data = []
+    name_map = {'luogu': '洛谷', 'nowcoder': '牛客', 'atcoder': 'AtCoder', 'codeforces': 'Codeforces',
+                'leetcode': '力扣', 'lanqiao': '蓝桥杯'}
+    for r in scrape_results:
+        platform_labels.append(name_map.get(r['platform'], r['platform']))
+        platform_data.append(r['total_solved'])
+
+    all_categories = {}
+    for r in scrape_results:
+        import json
+        try:
+            cat = json.loads(r['category_stats']) if r['category_stats'] else {}
+            for k, v in cat.items():
+                all_categories[k] = all_categories.get(k, 0) + v
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    handles = {h['platform']: h['handle'] for h in get_handles(id)}
+
+    return render_template('main/user_profile.html',
+                           target_user=target,
+                           scrape_results=scrape_results,
+                           total_solved=total_solved,
+                           ranking=ranking,
+                           platform_labels=platform_labels,
+                           platform_data=platform_data,
+                           all_categories=all_categories,
+                           handles=handles)
+
+
 @main_bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():

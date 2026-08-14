@@ -72,7 +72,7 @@
                     <tbody>
                         {% for m in members %}
                         <tr>
-                            <td>{{ m.real_name or '—' }}</td>
+                            <td><a href="{{ url_for('main.user_profile', id=m.user_id) }}" class="text-decoration-none">{{ m.real_name or '—' }}</a></td>
                             <td>{{ m.username }}</td>
                             <td>{{ m.grade or '—' }}</td>
                             <td>{{ m.joined_at[:16] if m.joined_at else '' }}</td>
