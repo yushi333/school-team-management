@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, SubmitField, SelectField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange
+from app.constants import WUYU_CHOICES
 
 
 PLATFORMS = [
@@ -45,3 +46,13 @@ class PlatformHandleForm(FlaskForm):
     leetcode_count = IntegerField('力扣 手动题量', validators=[Optional(), NumberRange(min=0)])
     lanqiao_count = IntegerField('蓝桥杯 手动题量', validators=[Optional(), NumberRange(min=0)])
     submit = SubmitField('保存平台账号')
+
+
+class RecruitmentForm(FlaskForm):
+    title = StringField('招募标题', validators=[DataRequired('请输入标题'), Length(max=256)])
+    competition_type = StringField('比赛类型', validators=[DataRequired('请输入比赛类型'), Length(max=128)])
+    recruit_count = IntegerField('招募人数', validators=[DataRequired('请输入招募人数'), NumberRange(min=1, max=1000, message='招募人数需在1-1000之间')])
+    wuyu_type = SelectField('五育类型', choices=WUYU_CHOICES, validators=[DataRequired('请选择五育类型')])
+    requirement = TextAreaField('招募要求', validators=[DataRequired('请填写招募要求')])
+    description = TextAreaField('补充说明', validators=[Optional()])
+    submit = SubmitField('发布招募')

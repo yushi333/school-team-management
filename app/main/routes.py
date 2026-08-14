@@ -1,15 +1,19 @@
 from datetime import datetime
+import sqlite3
 import threading
-from flask import render_template, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app, abort
 from flask_login import login_required, current_user
 from app.main import main_bp
-from app.main.forms import ProfileForm, PlatformHandleForm
+from app.main.forms import ProfileForm, PlatformHandleForm, RecruitmentForm
 from app.models.user import User
 from app.models.platform import get_scrape_results, set_handle, delete_handle, get_handles
 from app.models.content import (get_tutorials, get_tutorial, get_online_contests, get_campus_events,
                                 get_campus_event, get_awards)
 from app.models.registration import (get_registration, create_registration, delete_registration,
                                      get_today_ranking, get_today_rankings)
+from app.models.recruitment import (get_recruitments, get_recruitment, create_recruitment,
+                                    update_recruitment, delete_recruitment, get_members,
+                                    get_member, join_recruitment, leave_recruitment, count_members)
 
 
 @main_bp.route('/')
@@ -167,8 +171,11 @@ def online_contests():
 @main_bp.route('/campus-events')
 @login_required
 def campus_events():
+    wuyu = request.args.get('wuyu')
     events = get_campus_events()
-    return render_template('main/campus_events.html', events=events, now=datetime.utcnow())
+    if wuyu:
+        events = [e for e in events if e.get('wuyu_type') == wuyu]
+    return render_template('main/campus_events.html', events=events, now=datetime.utcnow(), current_filter=wuyu)
 
 
 @main_bp.route('/campus-events/<int:id>')
@@ -230,7 +237,123 @@ def cancel_registration(id):
 @main_bp.route('/awards')
 @login_required
 def awards():
-    return render_template('main/awards.html', awards=get_awards())
+    wuyu = request.args.get('wuyu')
+    award_list = get_awards()
+    if wuyu:
+        award_list = [a for a in award_list if a.get('wuyu_type') == wuyu]
+    return render_template('main/awards.html', awards=award_list, current_filter=wuyu)
+
+
+# ---- Team Recruitments ----
+@main_bp.route('/recruitments')
+@login_required
+def recruitments():
+    wuyu = request.args.get('wuyu')
+    return render_template('main/recruitments.html',
+                           recruitments=get_recruitments(wuyu_type=wuyu),
+                           current_filter=wuyu)
+
+
+@main_bp.route('/recruitments/create', methods=['GET', 'POST'])
+@login_required
+def new_recruitment():
+    form = RecruitmentForm()
+    if form.validate_on_submit():
+        create_recruitment(
+            title=form.title.data,
+            competition_type=form.competition_type.data.strip(),
+            recruit_count=form.recruit_count.data,
+            requirement=form.requirement.data.strip(),
+            wuyu_type=form.wuyu_type.data,
+            description=(form.description.data or '').strip() or None,
+            posted_by=current_user.id,
+        )
+        flash('组队招募已发布！', 'success')
+        return redirect(url_for('main.recruitments'))
+    return render_template('main/recruitment_form.html', form=form)
+
+
+@main_bp.route('/recruitments/<int:id>')
+@login_required
+def recruitment_detail(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        abort(404)
+    members = get_members(id)
+    member_count = recruit['member_count']
+    is_member = get_member(id, current_user.id) is not None
+    is_full = member_count >= recruit['recruit_count']
+    can_join = bool(recruit['is_open']) and not is_full and not is_member
+    return render_template('main/recruitment_detail.html',
+                           recruit=recruit, members=members, member_count=member_count,
+                           is_member=is_member, is_full=is_full, can_join=can_join)
+
+
+@main_bp.route('/recruitments/<int:id>/join', methods=['POST'])
+@login_required
+def join_recruitment_route(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        abort(404)
+    if not recruit['is_open']:
+        flash('该招募已关闭。', 'warning')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    if count_members(id) >= recruit['recruit_count']:
+        flash('该招募已满员。', 'warning')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    if get_member(id, current_user.id):
+        flash('您已加入该招募。', 'info')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    try:
+        join_recruitment(id, current_user.id)
+    except sqlite3.IntegrityError:
+        flash('您已加入该招募。', 'info')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    flash('加入成功！', 'success')
+    return redirect(url_for('main.recruitment_detail', id=id))
+
+
+@main_bp.route('/recruitments/<int:id>/leave', methods=['POST'])
+@login_required
+def leave_recruitment_route(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        abort(404)
+    if get_member(id, current_user.id):
+        leave_recruitment(id, current_user.id)
+        flash('已退出该招募。', 'info')
+    else:
+        flash('您未加入该招募。', 'warning')
+    return redirect(url_for('main.recruitment_detail', id=id))
+
+
+@main_bp.route('/recruitments/<int:id>/close', methods=['POST'])
+@login_required
+def close_recruitment_route(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        abort(404)
+    if not (current_user.is_admin() or recruit['posted_by'] == current_user.id):
+        flash('您没有权限执行此操作。', 'danger')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    new_open = 0 if recruit['is_open'] else 1
+    update_recruitment(id, is_open=new_open)
+    flash('招募已关闭。' if not new_open else '招募已重新开放。', 'success')
+    return redirect(url_for('main.recruitment_detail', id=id))
+
+
+@main_bp.route('/recruitments/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_recruitment_route(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        abort(404)
+    if not (current_user.is_admin() or recruit['posted_by'] == current_user.id):
+        flash('您没有权限执行此操作。', 'danger')
+        return redirect(url_for('main.recruitment_detail', id=id))
+    delete_recruitment(id)
+    flash('招募已删除。', 'success')
+    return redirect(url_for('main.recruitments'))
 
 
 def _scrape_user_async(user_id):

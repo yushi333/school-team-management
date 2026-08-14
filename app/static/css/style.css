@@ -197,6 +197,12 @@ body {
 .badge-codeforces { background: #e67e22; color: #fff; }
 .badge-leetcode { background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; }
 .badge-lanqiao { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; }
+/* 五育类型徽章 */
+.badge-deyu  { background: #ef4444; color: #fff; }
+.badge-zhiyu { background: #3b82f6; color: #fff; }
+.badge-tiyu  { background: #10b981; color: #fff; }
+.badge-laoyu { background: #f59e0b; color: #fff; }
+.badge-meiyu { background: #8b5cf6; color: #fff; }
 
 /* ═══════════ Alerts ═══════════ */
 .alert {

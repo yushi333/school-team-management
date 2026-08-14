@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}组队招募管理 - 管理后台{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-people-fill"></i> 组队招募管理</h4>
+
+<div class="card">
+    <div class="card-body">
+        {% if recruitments %}
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr><th>标题</th><th>比赛类型</th><th>五育</th><th>人数</th><th>状态</th><th>发布人</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+                {% for r in recruitments %}
+                <tr>
+                    <td>{{ r.title }}</td>
+                    <td>{{ r.competition_type }}</td>
+                    <td><span class="badge badge-{{ r.wuyu_type }}">{{ WUYU_LABELS.get(r.wuyu_type, r.wuyu_type) }}</span></td>
+                    <td>{{ r.member_count }}/{{ r.recruit_count }}</td>
+                    <td>
+                        {% if not r.is_open %}<span class="badge bg-secondary">已关闭</span>
+                        {% elif r.member_count >= r.recruit_count %}<span class="badge bg-danger">已满员</span>
+                        {% else %}<span class="badge bg-success">招募中</span>{% endif %}
+                    </td>
+                    <td>{{ r.poster_name or r.poster_username }}</td>
+                    <td>
+                        <a href="{{ url_for('main.recruitment_detail', id=r.id) }}" class="btn btn-sm btn-outline-primary">详情</a>
+                        <form method="POST" action="{{ url_for('admin.admin_toggle_recruitment', id=r.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">{% if r.is_open %}关闭{% else %}开放{% endif %}</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.admin_delete_recruitment', id=r.id) }}" class="d-inline" onsubmit="return confirm('确定删除？');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">暂无组队招募。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

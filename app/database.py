@@ -111,6 +111,27 @@ def init_db(app):
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS team_recruitments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            competition_type TEXT NOT NULL,
+            recruit_count INTEGER NOT NULL DEFAULT 1,
+            requirement TEXT,
+            description TEXT,
+            wuyu_type TEXT NOT NULL DEFAULT 'zhiyu',
+            is_open INTEGER DEFAULT 1,
+            posted_by INTEGER REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS recruitment_members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recruitment_id INTEGER NOT NULL REFERENCES team_recruitments(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(recruitment_id, user_id)
+        );
+
         PRAGMA foreign_keys = ON;
         PRAGMA journal_mode = WAL;
     ''')
@@ -121,6 +142,14 @@ def init_db(app):
         pass  # column already exists
     try:
         conn.execute("ALTER TABLE online_contests ADD COLUMN platform_contest_id TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE campus_events ADD COLUMN wuyu_type TEXT NOT NULL DEFAULT 'zhiyu'")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE awards ADD COLUMN wuyu_type TEXT NOT NULL DEFAULT 'zhiyu'")
     except sqlite3.OperationalError:
         pass  # column already exists
     conn.commit()

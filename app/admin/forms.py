@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField, DateTimeField, DateField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, URL
+from app.constants import WUYU_CHOICES
 
 
 class UserCreateForm(FlaskForm):
@@ -54,6 +55,7 @@ class CampusEventForm(FlaskForm):
     title = StringField('活动标题', validators=[DataRequired(), Length(max=256)])
     content = TextAreaField('活动详情', validators=[Optional()])
     location = StringField('活动地点', validators=[Optional(), Length(max=256)])
+    wuyu_type = SelectField('五育类型', choices=WUYU_CHOICES, validators=[DataRequired('请选择五育类型')])
     event_date = DateField('活动日期 (YYYY-MM-DD)', validators=[Optional()], format='%Y-%m-%d')
     registration_deadline = DateTimeField('报名截止时间 (YYYY-MM-DD HH:MM)', validators=[Optional()], format='%Y-%m-%d %H:%M')
     is_open = BooleanField('开放报名')

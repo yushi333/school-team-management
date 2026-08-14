@@ -16,6 +16,7 @@
             <div class="card-body">
                 {% if event.content %}<p>{{ event.content }}</p>{% endif %}
                 <table class="table table-sm">
+                    <tr><td class="text-muted">五育类型</td><td><span class="badge badge-{{ event.wuyu_type }}">{{ WUYU_LABELS.get(event.wuyu_type, event.wuyu_type) }}</span></td></tr>
                     <tr><td class="text-muted" width="100">活动日期</td><td>{{ event.event_date or '未定' }}</td></tr>
                     <tr><td class="text-muted">活动地点</td><td>{{ event.location or '未定' }}</td></tr>
                     <tr><td class="text-muted">报名截止</td><td>{{ event.registration_deadline[:16] if event.registration_deadline else '无截止时间' }}</td></tr>

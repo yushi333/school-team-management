@@ -23,6 +23,13 @@ def create_app(config_name=None):
     from app.models.user import load_user
     login_manager.user_loader(load_user)
 
+    # Inject wuyu constants into all templates
+    from app.constants import WUYU_TYPES, WUYU_LABELS
+
+    @app.context_processor
+    def inject_wuyu_constants():
+        return {'WUYU_TYPES': WUYU_TYPES, 'WUYU_LABELS': WUYU_LABELS}
+
     # Register blueprints
     from app.auth import auth_bp
     from app.main import main_bp

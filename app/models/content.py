@@ -84,10 +84,10 @@ def get_campus_event(eid):
     return query("SELECT ce.*, u.real_name as poster_name, u.username as poster_username FROM campus_events ce LEFT JOIN users u ON ce.posted_by=u.id WHERE ce.id=?", (eid,), one=True)
 
 
-def create_campus_event(title, content, location, event_date, registration_deadline, is_open, posted_by):
+def create_campus_event(title, content, location, event_date, registration_deadline, is_open, posted_by, wuyu_type='zhiyu'):
     return execute(
-        "INSERT INTO campus_events (title, content, location, event_date, registration_deadline, is_open, posted_by, created_at) VALUES (?,?,?,?,?,?,?,?)",
-        (title, content, location, event_date, registration_deadline, 1 if is_open else 0, posted_by, datetime.utcnow())
+        "INSERT INTO campus_events (title, content, location, event_date, registration_deadline, is_open, wuyu_type, posted_by, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+        (title, content, location, event_date, registration_deadline, 1 if is_open else 0, wuyu_type, posted_by, datetime.utcnow())
     )
 
 
@@ -117,10 +117,10 @@ def get_award(aid):
     return query("SELECT a.*, u.real_name as uploader_name, u.username as uploader_username FROM awards a LEFT JOIN users u ON a.uploaded_by=u.id WHERE a.id=?", (aid,), one=True)
 
 
-def create_award(title, description, file_path, file_type, original_filename, uploaded_by):
+def create_award(title, description, file_path, file_type, original_filename, uploaded_by, wuyu_type='zhiyu'):
     return execute(
-        "INSERT INTO awards (title, description, file_path, file_type, original_filename, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?)",
-        (title, description, file_path, file_type, original_filename, uploaded_by, datetime.utcnow())
+        "INSERT INTO awards (title, description, file_path, file_type, original_filename, wuyu_type, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?,?)",
+        (title, description, file_path, file_type, original_filename, wuyu_type, uploaded_by, datetime.utcnow())
     )
 
 

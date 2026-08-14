@@ -8,10 +8,13 @@ from app.models.content import (get_tutorials, create_tutorial, delete_tutorial,
                                 get_online_contests, create_online_contest, delete_online_contest,
                                 count_online_contests, get_campus_events, get_campus_event,
                                 create_campus_event, update_campus_event, delete_campus_event,
-                                count_campus_events, get_awards, create_award, delete_award, count_awards)
+                                count_campus_events, get_awards, get_award, create_award, delete_award, count_awards)
 from app.models.registration import get_registrations, count_all_registrations
+from app.models.recruitment import (get_recruitments, get_recruitment, update_recruitment,
+                                    delete_recruitment, count_recruitments)
 from app.decorators import admin_required
 from app.database import query
+from app.constants import WUYU_LABELS
 
 
 @admin_bp.route('/')
@@ -24,7 +27,8 @@ def index():
                            contest_count=count_online_contests(),
                            event_count=count_campus_events(),
                            reg_count=count_all_registrations(),
-                           award_count=count_awards())
+                           award_count=count_awards(),
+                           recruitment_count=count_recruitments())
 
 
 # ---- Users ----
@@ -176,7 +180,8 @@ def add_campus_event():
     if form.validate_on_submit():
         create_campus_event(
             form.title.data, form.content.data or None, form.location.data or None,
-            form.event_date.data, form.registration_deadline.data, form.is_open.data, current_user.id
+            form.event_date.data, form.registration_deadline.data, form.is_open.data, current_user.id,
+            form.wuyu_type.data
         )
         flash('校内活动已发布！', 'success')
         return redirect(url_for('admin.campus_event_list'))
@@ -196,7 +201,8 @@ def edit_campus_event(id):
                             title=form.title.data, content=form.content.data or None,
                             location=form.location.data or None, event_date=form.event_date.data,
                             registration_deadline=form.registration_deadline.data,
-                            is_open=1 if form.is_open.data else 0)
+                            is_open=1 if form.is_open.data else 0,
+                            wuyu_type=form.wuyu_type.data)
         flash('校内活动已更新！', 'success')
         return redirect(url_for('admin.campus_event_list'))
     return render_template('admin/campus_event_form.html', form=form, edit_mode=True, event=event)
@@ -247,9 +253,13 @@ def add_award():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         description = request.form.get('description', '').strip()
+        wuyu_type = request.form.get('wuyu_type', '').strip()
         file = request.files.get('file')
         if not title:
             flash('请输入标题。', 'danger')
+            return redirect(url_for('admin.add_award'))
+        if wuyu_type not in WUYU_LABELS:
+            flash('请选择五育类型。', 'danger')
             return redirect(url_for('admin.add_award'))
         if not file or not file.filename:
             flash('请选择文件。', 'danger')
@@ -272,7 +282,7 @@ def add_award():
         save_path = os.path.join(upload_dir, saved_name)
         file.save(save_path)
         rel_path = f'uploads/awards/{saved_name}'
-        create_award(title, description or None, rel_path, file_type, file.filename, current_user.id)
+        create_award(title, description or None, rel_path, file_type, file.filename, current_user.id, wuyu_type)
         flash('获奖材料已上传！', 'success')
         return redirect(url_for('admin.award_list'))
     return render_template('admin/award_form.html')
@@ -292,3 +302,33 @@ def delete_award_route(id):
     delete_award(id)
     flash('获奖材料已删除。', 'success')
     return redirect(url_for('admin.award_list'))
+
+
+# ---- Team Recruitments ----
+@admin_bp.route('/recruitments')
+@login_required
+@admin_required
+def recruitment_list():
+    return render_template('admin/recruitment_list.html', recruitments=get_recruitments())
+
+
+@admin_bp.route('/recruitments/<int:id>/close', methods=['POST'])
+@login_required
+@admin_required
+def admin_toggle_recruitment(id):
+    recruit = get_recruitment(id)
+    if not recruit:
+        from flask import abort; abort(404)
+    new_open = 0 if recruit['is_open'] else 1
+    update_recruitment(id, is_open=new_open)
+    flash('招募已关闭。' if not new_open else '招募已重新开放。', 'success')
+    return redirect(url_for('admin.recruitment_list'))
+
+
+@admin_bp.route('/recruitments/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_recruitment(id):
+    delete_recruitment(id)
+    flash('招募已删除。', 'success')
+    return redirect(url_for('admin.recruitment_list'))

@@ -19,6 +19,15 @@
                         <textarea name="description" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">五育类型</label>
+                        <select name="wuyu_type" class="form-select" required>
+                            <option value="">请选择五育类型</option>
+                            {% for key, label in WUYU_TYPES %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">选择文件</label>
                         <input type="file" name="file" class="form-control" required>
                         <div class="form-text">支持图片和文档格式（jpg, png, gif, pdf, doc, docx, xls, xlsx, ppt, pptx, zip 等）</div>

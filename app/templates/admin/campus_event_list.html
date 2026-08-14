@@ -12,12 +12,13 @@
         {% if events %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>标题</th><th>日期</th><th>报名</th><th>状态</th><th>操作</th></tr>
+                <tr><th>标题</th><th>五育</th><th>日期</th><th>报名</th><th>状态</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for e in events %}
                 <tr>
                     <td>{{ e.title }}</td>
+                    <td><span class="badge badge-{{ e.wuyu_type }}">{{ WUYU_LABELS.get(e.wuyu_type, e.wuyu_type) }}</span></td>
                     <td>{{ e.event_date or '未定' }}</td>
                     <td>{{ e.reg_count }} 人</td>
                     <td>{% if e.is_open %}<span class="badge bg-success">开放</span>{% else %}<span class="badge bg-secondary">关闭</span>{% endif %}</td>

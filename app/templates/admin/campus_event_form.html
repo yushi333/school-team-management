@@ -24,6 +24,11 @@
                         {{ form.location(class="form-control") }}
                     </div>
                     <div class="mb-3">
+                        {{ form.wuyu_type.label(class="form-label") }}
+                        {{ form.wuyu_type(class="form-select") }}
+                        {% for e in form.wuyu_type.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
                         {{ form.event_date.label(class="form-label") }}
                         {{ form.event_date(class="form-control", placeholder="2026-01-01") }}
                     </div>
