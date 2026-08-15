@@ -14,7 +14,8 @@ from app.models.content import (get_tutorials, create_tutorial, delete_tutorial,
 from app.models.registration import get_registrations, count_all_registrations
 from app.models.recruitment import (get_recruitments, get_recruitment, update_recruitment,
                                     delete_recruitment, count_recruitments)
-from app.models.document import (get_folders, get_folder, create_folder, delete_folder,
+from app.models.document import (get_folders, get_folder, create_folder, get_subfolder_ids,
+                                 get_files_in_folders, get_folder_path, delete_folder_subtree,
                                  get_files, get_file, add_file, delete_file, count_files)
 from app.models.platform import get_handles, get_scrape_results
 from app.decorators import admin_required
@@ -352,14 +353,15 @@ def delete_award_route(id):
 @login_required
 @admin_required
 def documents():
-    folders = get_folders()
     folder_id = request.args.get('folder', type=int)
-    current_folder = next((f for f in folders if f['id'] == folder_id), None)
-    if current_folder is None and folders:
-        current_folder = folders[0]
+    current_folder = get_folder(folder_id) if folder_id else None
+    # 子文件夹列表：当前文件夹（或根目录）下的下一层
+    folders = get_folders(current_folder['id'] if current_folder else None)
+    breadcrumbs = get_folder_path(current_folder['id']) if current_folder else []
     files = get_files(current_folder['id']) if current_folder else []
     return render_template('admin/documents.html', folders=folders,
-                           current_folder=current_folder, files=files)
+                           current_folder=current_folder, files=files,
+                           breadcrumbs=breadcrumbs)
 
 
 @admin_bp.route('/documents/folders/create', methods=['POST'])
@@ -367,12 +369,16 @@ def documents():
 @admin_required
 def create_folder_route():
     name = request.form.get('name', '').strip()
+    parent_id = request.form.get('parent_id', type=int)
+    if parent_id and not get_folder(parent_id):
+        parent_id = None  # 父文件夹不存在则落到根目录
     if not name or len(name) > 64:
         flash('请输入有效的文件夹名称。', 'danger')
     else:
-        create_folder(name)
+        create_folder(name, parent_id)
         flash('文件夹已创建。', 'success')
-    return redirect(url_for('admin.documents'))
+    return redirect(url_for('admin.documents', folder=parent_id) if parent_id
+                    else url_for('admin.documents'))
 
 
 @admin_bp.route('/documents/folders/<int:fid>/delete', methods=['POST'])
@@ -382,14 +388,17 @@ def delete_folder_route(fid):
     folder = get_folder(fid)
     if not folder:
         abort(404)
-    for f in get_files(fid):  # 先删磁盘文件，行由外键级联删除
+    ids = [fid] + get_subfolder_ids(fid)  # 先删整棵子树的磁盘文件
+    for f in get_files_in_folders(ids):
         full = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                             'app', 'static', f['file_path'])
         if os.path.exists(full):
             os.remove(full)
-    delete_folder(fid)
-    flash('文件夹已删除。', 'success')
-    return redirect(url_for('admin.documents'))
+    delete_folder_subtree(fid)
+    flash('文件夹及其内容已删除。', 'success')
+    parent_id = folder.get('parent_id')
+    return redirect(url_for('admin.documents', folder=parent_id) if parent_id
+                    else url_for('admin.documents'))
 
 
 @admin_bp.route('/documents/upload', methods=['POST'])

@@ -135,6 +135,7 @@ def init_db(app):
         CREATE TABLE IF NOT EXISTS doc_folders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            parent_id INTEGER REFERENCES doc_folders(id) ON DELETE CASCADE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -183,6 +184,10 @@ def init_db(app):
             conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
         except sqlite3.OperationalError:
             pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE doc_folders ADD COLUMN parent_id INTEGER REFERENCES doc_folders(id) ON DELETE CASCADE")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     # Preset document library folders (idempotent)
     for name in ('财务报表', '年审资料', '星级评比'):
         conn.execute(

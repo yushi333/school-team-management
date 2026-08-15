@@ -2,26 +2,54 @@
 {% block title %}资料库 - 管理后台{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h4><i class="bi bi-folder2-open"></i> 资料库</h4>
 </div>
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item {% if not current_folder %}active{% endif %}">
+            {% if not current_folder %}根目录{% else %}<a href="{{ url_for('admin.documents') }}">根目录</a>{% endif %}
+        </li>
+        {% for f in breadcrumbs %}
+        <li class="breadcrumb-item {{ 'active' if loop.last else '' }}">
+            {% if loop.last %}{{ f.name }}{% else %}<a href="{{ url_for('admin.documents', folder=f.id) }}">{{ f.name }}</a>{% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</nav>
 
 <div class="row g-3">
     <div class="col-md-4">
         <div class="card">
-            <div class="card-header"><i class="bi bi-folder me-2"></i>文件夹</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-folder me-2"></i>文件夹</span>
+                {% if current_folder %}
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{{ url_for('admin.documents', folder=current_folder.parent_id) if current_folder.parent_id else url_for('admin.documents') }}">
+                    <i class="bi bi-arrow-up"></i> 上级
+                </a>
+                {% endif %}
+            </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('admin.create_folder_route') }}" class="d-flex gap-2 mb-3">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="text" name="name" class="form-control" placeholder="新文件夹名称" required maxlength="64">
+                    <input type="hidden" name="parent_id" value="{{ current_folder.id if current_folder else '' }}">
+                    <input type="text" name="name" class="form-control"
+                           placeholder="{{ ('在「' ~ current_folder.name ~ '」内新建') if current_folder else '根目录新建文件夹' }}"
+                           required maxlength="64">
                     <button type="submit" class="btn btn-sm btn-primary">新建</button>
                 </form>
                 {% if folders %}
                 <div class="list-group">
                     {% for f in folders %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center {{ 'active' if current_folder and f.id == current_folder.id else '' }}">
-                        <a href="{{ url_for('admin.documents', folder=f.id) }}" class="text-decoration-none flex-grow-1"><i class="bi bi-folder me-1"></i>{{ f.name }}</a>
-                        <form method="POST" action="{{ url_for('admin.delete_folder_route', fid=f.id) }}" onsubmit="return confirm('删除文件夹及其所有文件？');">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('admin.documents', folder=f.id) }}" class="text-decoration-none flex-grow-1">
+                            <i class="bi bi-folder me-1"></i>{{ f.name }}
+                            <i class="bi bi-chevron-right small text-muted ms-1"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('admin.delete_folder_route', fid=f.id) }}"
+                              onsubmit="return confirm('删除该文件夹及其所有子文件夹和文件？');">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
                         </form>
@@ -37,7 +65,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark me-2"></i>{{ current_folder.name if current_folder else '文件' }}</span>
+                <span><i class="bi bi-file-earmark me-2"></i>{{ current_folder.name if current_folder else '根目录' }}</span>
                 {% if current_folder %}
                 <a href="{{ url_for('admin.documents', folder=current_folder.id) }}" class="btn btn-sm btn-outline-secondary">刷新</a>
                 {% endif %}
@@ -78,7 +106,7 @@
                 <p class="text-muted">该文件夹暂无文件。</p>
                 {% endif %}
                 {% else %}
-                <p class="text-muted">请先创建文件夹。</p>
+                <p class="text-muted">点击左侧文件夹进入，可在文件夹内上传文件或继续创建子文件夹。</p>
                 {% endif %}
             </div>
         </div>
