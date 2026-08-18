@@ -172,7 +172,13 @@ class User(UserMixin):
             self._data[k] = v
 
     def delete(self):
-        execute("DELETE FROM users WHERE id=?", (self._data['id'],))
+        uid = self._data['id']
+        # 先把内容上的发布者/上传者引用置空（内容保留），否则外键约束会阻断删除
+        for table, col in (('tutorials', 'posted_by'), ('online_contests', 'posted_by'),
+                           ('campus_events', 'posted_by'), ('team_recruitments', 'posted_by'),
+                           ('awards', 'uploaded_by'), ('doc_files', 'uploaded_by')):
+            execute(f"UPDATE {table} SET {col}=NULL WHERE {col}=?", (uid,))
+        execute("DELETE FROM users WHERE id=?", (uid,))
 
     @staticmethod
     def create_table():

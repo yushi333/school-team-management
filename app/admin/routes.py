@@ -313,6 +313,7 @@ def add_award():
         description = request.form.get('description', '').strip()
         wuyu_type = request.form.get('wuyu_type', '').strip()
         year_raw = request.form.get('year', '').strip()
+        visibility = request.form.get('visibility', 'public').strip()
         file = request.files.get('file')
         if not title:
             flash('请输入标题。', 'danger')
@@ -326,12 +327,14 @@ def add_award():
                 flash('请选择有效的年份。', 'danger')
                 return redirect(url_for('admin.add_award'))
             award_year = int(year_raw)
+        if visibility not in ('public', 'private'):
+            visibility = 'public'
         if not file or not file.filename:
             flash('请选择文件。', 'danger')
             return redirect(url_for('admin.add_award'))
         rel_path, original, _ = save_upload_file(file, 'awards')
         create_award(title, description or None, rel_path, classify_file_type(original), original,
-                     current_user.id, wuyu_type, award_year)
+                     current_user.id, wuyu_type, award_year, visibility)
         flash('获奖材料已上传！', 'success')
         return redirect(url_for('admin.award_list'))
     current_year = datetime.now().year

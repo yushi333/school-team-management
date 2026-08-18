@@ -13,7 +13,7 @@ from app.models.user import User
 from app.models.platform import get_scrape_results, set_handle, delete_handle, get_handles
 from app.models.content import (get_tutorials, get_tutorial, get_online_contests, get_online_contest,
                                 get_campus_events, get_campus_event,
-                                get_awards, get_award, create_award, delete_award, get_award_years)
+                                get_awards, get_award, create_award, delete_award)
 from app.models.registration import (get_registration, create_registration, delete_registration,
                                      get_today_ranking, get_today_rankings)
 from app.models.recruitment import (get_recruitments, get_recruitment, create_recruitment,
@@ -377,13 +377,20 @@ def cancel_registration(id):
 def awards():
     wuyu = request.args.get('wuyu')
     year = request.args.get('year', type=int)
-    award_list = get_awards()
+    all_awards = get_awards()
+    # 可见性过滤：公开材料所有人可见；仅自己可见的材料只有上传者和管理员可见
+    visible = [a for a in all_awards
+               if a.get('visibility') != 'private'
+               or a.get('uploaded_by') == current_user.id
+               or current_user.is_admin()]
+    years = sorted({a['award_year'] for a in visible if a.get('award_year')}, reverse=True)
+    award_list = visible
     if wuyu:
         award_list = [a for a in award_list if a.get('wuyu_type') == wuyu]
     if year:
         award_list = [a for a in award_list if a.get('award_year') == year]
     return render_template('main/awards.html', awards=award_list,
-                           current_filter=wuyu, current_year=year, years=get_award_years())
+                           current_filter=wuyu, current_year=year, years=years)
 
 
 @main_bp.route('/awards/upload', methods=['GET', 'POST'])
@@ -394,6 +401,7 @@ def upload_award_route():
         description = request.form.get('description', '').strip()
         wuyu_type = request.form.get('wuyu_type', '').strip()
         year_raw = request.form.get('year', '').strip()
+        visibility = request.form.get('visibility', 'public').strip()
         file = request.files.get('file')
         if not title:
             flash('请输入标题。', 'danger')
@@ -405,12 +413,14 @@ def upload_award_route():
             flash('请选择获奖年份。', 'danger')
             return redirect(url_for('main.upload_award_route'))
         award_year = int(year_raw)
+        if visibility not in ('public', 'private'):
+            visibility = 'public'
         if not file or not file.filename:
             flash('请选择文件。', 'danger')
             return redirect(url_for('main.upload_award_route'))
         rel_path, original, _ = save_upload_file(file, 'awards')
         create_award(title, description or None, rel_path, classify_file_type(original), original,
-                     current_user.id, wuyu_type, award_year)
+                     current_user.id, wuyu_type, award_year, visibility)
         flash('获奖材料已上传！', 'success')
         return redirect(url_for('main.awards'))
     current_year = datetime.now().year

@@ -126,10 +126,10 @@ def get_award_years():
         "SELECT DISTINCT award_year FROM awards WHERE award_year IS NOT NULL ORDER BY award_year DESC")]
 
 
-def create_award(title, description, file_path, file_type, original_filename, uploaded_by, wuyu_type='zhiyu', award_year=None):
+def create_award(title, description, file_path, file_type, original_filename, uploaded_by, wuyu_type='zhiyu', award_year=None, visibility='public'):
     return execute(
-        "INSERT INTO awards (title, description, file_path, file_type, original_filename, wuyu_type, award_year, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
-        (title, description, file_path, file_type, original_filename, wuyu_type, award_year, uploaded_by, datetime.utcnow())
+        "INSERT INTO awards (title, description, file_path, file_type, original_filename, wuyu_type, award_year, visibility, uploaded_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        (title, description, file_path, file_type, original_filename, wuyu_type, award_year, visibility, uploaded_by, datetime.utcnow())
     )
 
 

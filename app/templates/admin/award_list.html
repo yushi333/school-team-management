@@ -12,7 +12,7 @@
         {% if awards %}
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>标题</th><th>五育</th><th>年份</th><th>类型</th><th>文件名</th><th>时间</th><th>操作</th></tr>
+                <tr><th>标题</th><th>五育</th><th>年份</th><th>可见范围</th><th>上传者</th><th>类型</th><th>文件名</th><th>时间</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for a in awards %}
@@ -20,6 +20,8 @@
                     <td>{{ a.title }}</td>
                     <td><span class="badge badge-{{ a.wuyu_type }}">{{ WUYU_LABELS.get(a.wuyu_type, a.wuyu_type) }}</span></td>
                     <td>{{ a.award_year or '-' }}</td>
+                    <td>{% if a.visibility == 'private' %}<span class="badge bg-warning text-dark"><i class="bi bi-lock-fill"></i> 仅自己可见</span>{% else %}<span class="badge bg-secondary">公开</span>{% endif %}</td>
+                    <td>{{ a.uploader_name or a.uploader_username or '-' }}</td>
                     <td>
                         {% if a.file_type == 'image' %}<span class="badge bg-info">图片</span>
                         {% elif a.file_type == 'document' %}<span class="badge bg-warning">文档</span>

@@ -183,6 +183,10 @@ def init_db(app):
         conn.execute("ALTER TABLE awards ADD COLUMN award_year INTEGER")
     except sqlite3.OperationalError:
         pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE awards ADD COLUMN visibility TEXT NOT NULL DEFAULT 'public'")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     for col in ('email', 'student_id', 'surname_zh', 'given_name_zh', 'first_name',
                 'last_name', 'gender', 'phone', 'enroll_year', 'department',
                 'major', 'grad_year', 'tshirt_size'):
