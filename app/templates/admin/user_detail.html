@@ -18,6 +18,7 @@
             <div class="card-body">
                 <table class="table table-sm mb-0">
                     <tr><td class="text-muted" width="110">用户名</td><td><strong>{{ target_user.username }}</strong></td></tr>
+                    <tr><td class="text-muted">身份</td><td>{% if target_user.member_type == 'formal' %}<span class="badge bg-success">正式成员</span>{% else %}<span class="badge bg-warning text-dark">测试成员</span>{% endif %}</td></tr>
                     <tr><td class="text-muted">角色</td><td><span class="badge bg-{{ 'danger' if target_user.role == 'admin' else 'secondary' }}">{{ '管理员' if target_user.role == 'admin' else '成员' }}</span></td></tr>
                     <tr><td class="text-muted">注册时间</td><td>{{ target_user.created_at[:16] if target_user.created_at else '' }}</td></tr>
                 </table>

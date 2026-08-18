@@ -20,6 +20,7 @@ def init_db(app):
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'member',
+            member_type TEXT NOT NULL DEFAULT 'trial',
             grade TEXT,
             real_name TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -171,6 +172,10 @@ def init_db(app):
         pass  # column already exists
     try:
         conn.execute("ALTER TABLE users ADD COLUMN avatar_path TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN member_type TEXT NOT NULL DEFAULT 'trial'")
     except sqlite3.OperationalError:
         pass  # column already exists
     try:

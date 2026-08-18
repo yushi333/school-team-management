@@ -5,6 +5,7 @@ from app.constants import WUYU_CHOICES
 
 STUDY_YEARS = [('', '请选择')] + [(f'{y}级', f'{y}级') for y in range(2022, 2031)] + [('研究生', '研究生')]
 TSHIRT_SIZES = [('', '请选择'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL'), ('XXL', 'XXL'), ('XXXL', 'XXXL')]
+MEMBER_TYPES = [('trial', '测试成员'), ('formal', '正式成员')]
 
 
 class UserCreateForm(FlaskForm):
@@ -16,6 +17,7 @@ class UserCreateForm(FlaskForm):
         ('2025级', '2025级'), ('2026级', '2026级'), ('2027级', '2027级'), ('2028级', '2028级'), ('研究生', '研究生'),
     ])
     role = SelectField('角色', choices=[('member', '普通成员'), ('admin', '管理员')])
+    member_type = SelectField('成员身份', choices=MEMBER_TYPES, default='trial')
     submit = SubmitField('创建用户')
 
 
@@ -39,6 +41,7 @@ class UserEditForm(FlaskForm):
     grad_year = SelectField('毕业年份', choices=STUDY_YEARS, validators=[Optional()])
     tshirt_size = SelectField('T恤尺码', choices=TSHIRT_SIZES, validators=[Optional()])
     role = SelectField('角色', choices=[('member', '普通成员'), ('admin', '管理员')])
+    member_type = SelectField('成员身份', choices=MEMBER_TYPES)
     submit = SubmitField('保存修改')
 
 

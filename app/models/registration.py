@@ -48,7 +48,7 @@ def get_today_ranking(user_id):
 
 def get_today_rankings():
     today = date.today().isoformat()
-    return query("SELECT dr.*, u.username, u.real_name, u.grade, u.avatar_path FROM daily_rankings dr JOIN users u ON dr.user_id=u.id WHERE dr.snapshot_date=? ORDER BY dr.rank ASC", (today,))
+    return query("SELECT dr.*, u.username, u.real_name, u.grade, u.avatar_path, u.member_type FROM daily_rankings dr JOIN users u ON dr.user_id=u.id WHERE dr.snapshot_date=? ORDER BY dr.rank ASC", (today,))
 
 
 def recompute_rankings():

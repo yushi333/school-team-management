@@ -34,6 +34,7 @@
                     <tr><td class="text-muted" width="100"><i class="bi bi-person me-2"></i>用户名</td><td><strong>{{ current_user.username }}</strong></td></tr>
                     <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
                     <tr><td class="text-muted"><i class="bi bi-mortarboard me-2"></i>年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
+                    <tr><td class="text-muted"><i class="bi bi-patch-check me-2"></i>身份</td><td>{% if current_user.member_type == 'formal' %}<span class="badge bg-success">正式成员</span>{% else %}<span class="badge bg-warning text-dark">测试成员</span>{% endif %}</td></tr>
                     {% if current_user.student_id %}
                     <tr><td class="text-muted"><i class="bi bi-hash me-2"></i>学号</td><td>{{ current_user.student_id }}</td></tr>
                     {% endif %}

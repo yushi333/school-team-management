@@ -8,11 +8,17 @@
     <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 创建用户</a>
 </div>
 
+<div class="mb-3">
+    <a href="{{ url_for('admin.user_list') }}" class="btn btn-sm btn-{{ 'primary' if not member_type_filter else 'outline-primary' }}">全部</a>
+    <a href="{{ url_for('admin.user_list', member_type='formal') }}" class="btn btn-sm btn-{{ 'primary' if member_type_filter == 'formal' else 'outline-primary' }}"><i class="bi bi-patch-check me-1"></i>正式成员</a>
+    <a href="{{ url_for('admin.user_list', member_type='trial') }}" class="btn btn-sm btn-{{ 'primary' if member_type_filter == 'trial' else 'outline-primary' }}"><i class="bi bi-hourglass-split me-1"></i>测试成员</a>
+</div>
+
 <div class="card">
     <div class="card-body">
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>用户名</th><th>姓名</th><th>年级</th><th>角色</th><th>操作</th></tr>
+                <tr><th>用户名</th><th>姓名</th><th>年级</th><th>身份</th><th>角色</th><th>操作</th></tr>
             </thead>
             <tbody>
                 {% for u in users %}
@@ -20,6 +26,7 @@
                     <td>{{ u.username }}</td>
                     <td><span class="d-inline-flex align-items-center gap-2">{{ avatar(u.avatar_path, u.real_name or u.username) }}<a href="{{ url_for('admin.user_detail', id=u.id) }}">{{ u.real_name or '-' }}</a></span></td>
                     <td>{{ u.grade or '-' }}</td>
+                    <td>{% if u.member_type == 'formal' %}<span class="badge bg-success">正式成员</span>{% else %}<span class="badge bg-warning text-dark">测试成员</span>{% endif %}</td>
                     <td><span class="badge bg-{{ 'danger' if u.role == 'admin' else 'secondary' }}">{{ '管理员' if u.role == 'admin' else '成员' }}</span></td>
                     <td>
                         <a href="{{ url_for('admin.edit_user', id=u.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>

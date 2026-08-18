@@ -49,7 +49,11 @@ def index():
 @login_required
 @admin_required
 def user_list():
-    return render_template('admin/user_list.html', users=User.all())
+    mtype = request.args.get('member_type')
+    users = User.all()
+    if mtype in ('trial', 'formal'):
+        users = [u for u in users if u.member_type == mtype]
+    return render_template('admin/user_list.html', users=users, member_type_filter=mtype)
 
 
 @admin_bp.route('/users/create', methods=['GET', 'POST'])
@@ -61,7 +65,9 @@ def create_user():
         if User.find_by_username(form.username.data):
             flash('用户名已存在。', 'danger')
         else:
-            User.create(form.username.data, form.password.data, form.role.data, form.real_name.data or None, form.grade.data or None)
+            User.create(form.username.data, form.password.data, form.role.data,
+                        form.real_name.data or None, form.grade.data or None,
+                        member_type=form.member_type.data or 'trial')
             flash(f'用户 {form.username.data} 创建成功！', 'success')
             return redirect(url_for('admin.user_list'))
     return render_template('admin/user_form.html', form=form, edit_mode=False)
@@ -89,6 +95,7 @@ def edit_user(id):
     form = UserEditForm(obj=user)
     if form.validate_on_submit():
         user.update(real_name=form.real_name.data or None, grade=form.grade.data or None, role=form.role.data,
+                    member_type=form.member_type.data or 'trial',
                     email=_clean(form.email.data), student_id=_clean(form.student_id.data),
                     surname_zh=_clean(form.surname_zh.data), given_name_zh=_clean(form.given_name_zh.data),
                     first_name=_clean(form.first_name.data), last_name=_clean(form.last_name.data),

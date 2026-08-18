@@ -265,7 +265,7 @@ def leaderboard():
         # Fallback: compute on the fly
         from app.database import query
         rows = query(
-            "SELECT u.id as user_id, u.username, u.real_name, u.grade, u.avatar_path, "
+            "SELECT u.id as user_id, u.username, u.real_name, u.grade, u.avatar_path, u.member_type, "
             "COALESCE(SUM(sr.total_solved),0) as total_solved "
             "FROM users u LEFT JOIN scrape_results sr ON u.id=sr.user_id "
             "GROUP BY u.id ORDER BY total_solved DESC"

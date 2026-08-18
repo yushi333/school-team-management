@@ -25,6 +25,10 @@ class User(UserMixin):
         return self._data.get('role', 'member')
 
     @property
+    def member_type(self):
+        return self._data.get('member_type', 'trial')
+
+    @property
     def grade(self):
         return self._data.get('grade')
 
@@ -142,11 +146,11 @@ class User(UserMixin):
         return User(r) if r else None
 
     @staticmethod
-    def create(username, password, role='member', real_name=None, grade=None):
+    def create(username, password, role='member', real_name=None, grade=None, member_type='trial'):
         h = User.hash_password(password)
         uid = execute(
-            "INSERT INTO users (username, password_hash, role, real_name, grade, created_at, updated_at) VALUES (?,?,?,?,?,?,?)",
-            (username, h, role, real_name, grade, datetime.utcnow(), datetime.utcnow())
+            "INSERT INTO users (username, password_hash, role, real_name, grade, member_type, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)",
+            (username, h, role, real_name, grade, member_type, datetime.utcnow(), datetime.utcnow())
         )
         return User.find_by_id(uid)
 
