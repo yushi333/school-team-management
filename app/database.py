@@ -1,6 +1,7 @@
 """Database module using Python's built-in sqlite3 (zero import overhead)."""
 import sqlite3
 import os
+import time
 import threading
 
 # Thread-local connections for thread safety
@@ -202,11 +203,20 @@ def init_db(app):
 
 
 def get_conn():
-    """Get a thread-local database connection."""
+    """Get a thread-local database connection.
+
+    isolation_level=None (autocommit): each statement commits itself, so a
+    failed statement can never leave a stale open transaction that would
+    block later writes on this connection (the classic cause of intermittent
+    'database is locked' under waitress multi-threading + scheduler threads).
+    """
     if not hasattr(_local, 'conn') or _local.conn is None:
-        _local.conn = sqlite3.connect(DB_PATH)
+        _local.conn = sqlite3.connect(DB_PATH, timeout=15, isolation_level=None)
         _local.conn.row_factory = sqlite3.Row
         _local.conn.execute("PRAGMA foreign_keys = ON")
+        _local.conn.execute("PRAGMA busy_timeout = 15000")  # wait instead of failing on lock
+        _local.conn.execute("PRAGMA journal_mode = WAL")
+        _local.conn.execute("PRAGMA synchronous = NORMAL")  # faster writes, less lock hold time
     return _local.conn
 
 
@@ -221,11 +231,25 @@ def query(sql, params=(), one=False):
 
 
 def execute(sql, params=()):
-    """Execute INSERT/UPDATE/DELETE. Returns lastrowid."""
+    """Execute INSERT/UPDATE/DELETE. Returns lastrowid.
+
+    Retries on lock contention: busy_timeout may still expire under heavy
+    concurrent writes (scheduler + scraper + waitress threads). Autocommit
+    mode means a retried statement never runs inside a stale transaction.
+    """
     conn = get_conn()
-    cur = conn.execute(sql, params)
-    conn.commit()
-    return cur.lastrowid
+    for attempt in range(3):
+        try:
+            cur = conn.execute(sql, params)
+            conn.commit()  # no-op in autocommit mode, kept for safety
+            return cur.lastrowid
+        except sqlite3.OperationalError as e:
+            msg = str(e).lower()
+            if 'locked' in msg or 'busy' in msg:
+                time.sleep(0.5 * (attempt + 1))  # brief backoff, then retry
+                continue
+            raise
+    raise sqlite3.OperationalError('database is locked after retries')
 
 
 def close_db():
