@@ -2,6 +2,7 @@
 
 import re
 import json
+import html
 import requests
 from datetime import datetime, timezone, timedelta
 from bs4 import BeautifulSoup
@@ -98,29 +99,47 @@ def scrape_atcoder_contests():
 
 
 def scrape_nowcoder_contests():
-    """Scrape upcoming Nowcoder contests."""
+    """Scrape Nowcoder contests from the vip-index page.
+
+    The page is server-rendered (no login / no JS needed): each contest is a
+    div.platform-item carrying an HTML-escaped data-json attribute with
+    contestName, contestStartTime and contestEndTime (millisecond timestamps).
+    """
     contests = []
     try:
         url = 'https://ac.nowcoder.com/acm/contest/vip-index'
         resp = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
         soup = BeautifulSoup(resp.text, 'lxml')
-        # Try to find contest cards with links
-        for a in soup.select('a[href*="/acm/contest/"]'):
-            href = a.get('href', '')
-            if '/discuss' in href or '/problem' in href or href.endswith('/acm/contest/'):
+        for div in soup.select('div.platform-item.js-item[data-json]'):
+            try:
+                info = json.loads(html.unescape(div.get('data-json', '')))
+            except (json.JSONDecodeError, TypeError):
                 continue
-            title = a.get_text(strip=True)
-            if not title or len(title) < 3:
+            cid = info.get('contestId') or div.get('data-id')
+            title = info.get('contestName')
+            if not cid or not title:
                 continue
-            full_url = 'https://ac.nowcoder.com' + href if href.startswith('/') else href
-            pid = href.rstrip('/').split('/')[-1]
+            start_ms = info.get('contestStartTime')
+            end_ms = info.get('contestEndTime')
+            start_time = None
+            end_time = None
+            if start_ms:
+                try:
+                    start_time = datetime.fromtimestamp(int(start_ms) / 1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+                except (ValueError, OSError):
+                    pass
+            if end_ms:
+                try:
+                    end_time = datetime.fromtimestamp(int(end_ms) / 1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+                except (ValueError, OSError):
+                    pass
             contests.append({
                 'platform': 'nowcoder',
-                'platform_contest_id': pid,
+                'platform_contest_id': str(cid),
                 'title': title,
-                'contest_url': full_url,
-                'start_time': None,
-                'end_time': None,
+                'contest_url': f'https://ac.nowcoder.com/acm/contest/{cid}',
+                'start_time': start_time,
+                'end_time': end_time,
                 'description': '',
             })
     except Exception as e:
@@ -200,6 +219,7 @@ def scrape_all_contests():
     scrapers = [
         ('codeforces', scrape_codeforces_contests),
         ('atcoder', scrape_atcoder_contests),
+        ('nowcoder', scrape_nowcoder_contests),
         ('luogu', scrape_luogu_contests),
         ('leetcode', scrape_leetcode_contests),
         ('lanqiao', scrape_lanqiao_contests),

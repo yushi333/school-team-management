@@ -1,5 +1,5 @@
 from datetime import datetime
-import base64
+import io
 import os
 import re
 import sqlite3
@@ -31,9 +31,6 @@ def _clean_optional(v):
 @main_bp.route('/')
 @login_required
 def index():
-    scrape_results = get_scrape_results(current_user.id)
-    total_solved = sum(r['total_solved'] for r in scrape_results)
-    my_ranking = get_today_ranking(current_user.id)
     upcoming_events = [
         e for e in get_campus_events()
         if e['is_open'] and (not e['registration_deadline'] or e['registration_deadline'] >= datetime.utcnow().isoformat())
@@ -43,19 +40,27 @@ def index():
         c for c in get_online_contests()
         if c['end_time'] is None or c['end_time'] >= now_iso
     ][:5]
+    # 首页 banner：读取 static/images/banner/ 目录里的图片（放进去多少张就轮播多少张）
+    banner_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                              'app', 'static', 'images', 'banner')
+    banner_images = []
+    if os.path.isdir(banner_dir):
+        banner_images = sorted(
+            f for f in os.listdir(banner_dir)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif'))
+        )
 
     return render_template('main/index.html',
-                           total_solved=total_solved,
-                           scrape_results=scrape_results,
-                           my_ranking=my_ranking,
                            upcoming_events=upcoming_events,
-                           recent_contests=recent_contests)
+                           recent_contests=recent_contests,
+                           banner_images=banner_images)
 
 
 @main_bp.route('/profile')
 @login_required
 def profile():
     scrape_results = get_scrape_results(current_user.id)
+    total_solved = sum(r['total_solved'] for r in scrape_results)
     platform_labels = []
     platform_data = []
     name_map = {'luogu': '洛谷', 'nowcoder': '牛客', 'atcoder': 'AtCoder', 'codeforces': 'Codeforces',
@@ -78,6 +83,7 @@ def profile():
 
     return render_template('main/profile.html',
                            scrape_results=scrape_results,
+                           total_solved=total_solved,
                            platform_labels=platform_labels,
                            platform_data=platform_data,
                            all_categories=all_categories,
@@ -144,32 +150,40 @@ def _save_avatar_bytes(data, ext):
     current_user.update(avatar_path=rel_path)
 
 
+def _process_avatar_image(data, ext):
+    """Server-side avatar processing: center-crop to a square, resize to 256x256.
+
+    Returns (bytes, ext). Falls back to the original bytes when the image
+    can't be decoded (e.g. corrupted file) so the upload never hard-fails.
+    """
+    try:
+        from PIL import Image, ImageOps
+        img = Image.open(io.BytesIO(data))
+        img = ImageOps.exif_transpose(img)  # 纠正手机照片的 EXIF 旋转
+        if img.mode not in ('RGB', 'RGBA'):
+            img = img.convert('RGBA' if getattr(img, 'format', '') == 'PNG' else 'RGB')
+        w, h = img.size
+        side = min(w, h)
+        left = (w - side) // 2
+        top = (h - side) // 2
+        img = img.crop((left, top, left + side, top + side))  # 居中裁成正方形
+        img = img.resize((256, 256), Image.LANCZOS)
+        out = io.BytesIO()
+        if ext in ('jpg', 'jpeg'):
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+            img.save(out, 'JPEG', quality=90)
+            return out.getvalue(), 'jpg'
+        img.save(out, 'PNG')
+        return out.getvalue(), 'png'
+    except Exception as e:
+        print(f"[Avatar] server-side processing failed, keeping original: {e}")
+        return data, ext
+
+
 @main_bp.route('/profile/avatar', methods=['POST'])
 @login_required
 def upload_avatar():
-    # 裁剪后的 dataURL 优先
-    cropped_data = request.form.get('cropped_data', '')
-    if cropped_data:
-        if not cropped_data.startswith('data:image/') or ';base64,' not in cropped_data:
-            flash('裁剪数据无效。', 'danger')
-            return redirect(url_for('main.profile'))
-        header, b64 = cropped_data.split(',', 1)
-        fmt = header.split(';')[0].split('/')[1]
-        if fmt not in ('png', 'jpeg', 'webp'):
-            flash('头像仅支持 jpg / png / webp 格式。', 'danger')
-            return redirect(url_for('main.profile'))
-        try:
-            raw = base64.b64decode(b64 + '=' * (-len(b64) % 4))
-        except Exception:
-            flash('裁剪数据无效。', 'danger')
-            return redirect(url_for('main.profile'))
-        if len(raw) > 5 * 1024 * 1024:
-            flash('头像文件不能超过 5MB。', 'danger')
-            return redirect(url_for('main.profile'))
-        _save_avatar_bytes(raw, 'jpg' if fmt == 'jpeg' else fmt)
-        flash('头像已更新！', 'success')
-        return redirect(url_for('main.profile'))
-
     file = request.files.get('avatar')
     if not file or not file.filename:
         flash('请选择图片文件。', 'warning')
@@ -182,7 +196,8 @@ def upload_avatar():
     if len(data) > 5 * 1024 * 1024:
         flash('头像文件不能超过 5MB。', 'danger')
         return redirect(url_for('main.profile'))
-    _save_avatar_bytes(data, ext)
+    processed, save_ext = _process_avatar_image(data, ext)
+    _save_avatar_bytes(processed, save_ext)
     flash('头像已更新！', 'success')
     return redirect(url_for('main.profile'))
 

@@ -3,8 +3,6 @@
 {% from "macros/avatar.html" import avatar %}
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,12 +20,11 @@
             <div class="card-body">
                 <div class="text-center mb-3">
                     {{ avatar(current_user.avatar_path, current_user.real_name or current_user.username, 'lg') }}
-                    <form method="POST" action="{{ url_for('main.upload_avatar') }}" enctype="multipart/form-data" id="avatar-form" class="mt-3">
+                    <form method="POST" action="{{ url_for('main.upload_avatar') }}" enctype="multipart/form-data" class="mt-3">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="cropped_data" id="cropped-data">
-                        <input type="file" name="avatar" id="avatar-file" accept="image/jpg,image/jpeg,image/png,image/gif,image/webp" class="form-control form-control-sm mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="avatar-crop-btn"><i class="bi bi-scissors me-1"></i>裁剪并上传</button>
-                        <button type="submit" class="btn btn-sm btn-outline-secondary">直接上传原图</button>
+                        <input type="file" name="avatar" accept="image/jpg,image/jpeg,image/png,image/gif,image/webp" class="form-control form-control-sm mb-2">
+                        <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-upload me-1"></i>上传头像</button>
+                        <div class="form-text mt-1">上传后自动居中裁剪为正方形。</div>
                     </form>
                 </div>
                 <table class="table table-sm mb-0">
@@ -35,6 +32,7 @@
                     <tr><td class="text-muted"><i class="bi bi-card-text me-2"></i>姓名</td><td>{{ current_user.real_name or '未填写' }}</td></tr>
                     <tr><td class="text-muted"><i class="bi bi-mortarboard me-2"></i>年级</td><td>{{ current_user.grade or '未填写' }}</td></tr>
                     <tr><td class="text-muted"><i class="bi bi-patch-check me-2"></i>身份</td><td>{% if current_user.member_type == 'formal' %}<span class="badge bg-success">正式成员</span>{% else %}<span class="badge bg-warning text-dark">测试成员</span>{% endif %}</td></tr>
+                    <tr><td class="text-muted"><i class="bi bi-fire me-2"></i>总题量</td><td><strong class="fs-5 text-primary">{{ total_solved }}</strong> 题</td></tr>
                     {% if current_user.student_id %}
                     <tr><td class="text-muted"><i class="bi bi-hash me-2"></i>学号</td><td>{{ current_user.student_id }}</td></tr>
                     {% endif %}
@@ -145,28 +143,9 @@
     {% endif %}
 </div>
 {% endif %}
-<!-- 头像裁剪弹窗 -->
-<div class="modal fade" id="cropModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">裁剪头像</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="crop-preview"><img id="crop-image" alt=""></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" id="crop-confirm">裁剪并上传</button>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/avatar_crop.js') }}"></script>
 {% if platform_data and platform_data|sum > 0 %}
 <script>
 const isDark = document.documentElement.hasAttribute('data-bs-theme');

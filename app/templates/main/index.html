@@ -2,41 +2,37 @@
 {% block title %}首页 - ACM校队管理系统{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h3><i class="bi bi-speedometer2 me-2"></i>控制面板</h3>
+{% if banner_images %}
+<div id="homeBanner" class="carousel slide mb-4 rounded-3 overflow-hidden shadow-sm" data-bs-ride="carousel" data-bs-interval="4000">
+    {% if banner_images|length > 1 %}
+    <div class="carousel-indicators">
+        {% for img in banner_images %}
+        <button type="button" data-bs-target="#homeBanner" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active" aria-current="true"{% endif %}></button>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="carousel-inner">
+        {% for img in banner_images %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename='images/banner/' ~ img) }}" class="d-block w-100 banner-img" alt="banner">
+        </div>
+        {% endfor %}
+    </div>
+    {% if banner_images|length > 1 %}
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeBanner" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeBanner" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+    {% endif %}
 </div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card accent-blue">
-            <div class="card-body text-center">
-                <h1 class="display-5 text-primary mb-1">{{ total_solved }}</h1>
-                <p class="text-muted mb-0 small fw-medium">总做题量</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card stat-card accent-green">
-            <div class="card-body text-center">
-                <h1 class="display-5 text-success mb-1">
-                    {% if my_ranking %}#{{ my_ranking.rank }}{% else %}-{% endif %}
-                </h1>
-                <p class="text-muted mb-0 small fw-medium">今日排名</p>
-            </div>
-        </div>
-    </div>
-    {% for r in scrape_results %}
-    <div class="col-md-3">
-        <div class="card stat-card {{ ['accent-orange','accent-purple','accent-teal','accent-red','accent-blue','accent-green'][loop.index0 % 6] }}">
-            <div class="card-body text-center">
-                <h5 class="mb-1 fw-bold">{{ {'luogu':'洛谷','nowcoder':'牛客','atcoder':'AtCoder','codeforces':'CF','leetcode':'力扣','lanqiao':'蓝桥杯'}.get(r.platform, r.platform) }}</h5>
-                <h2 class="mb-0">{{ r.total_solved }}</h2>
-                <small class="text-muted">题</small>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+{% else %}
+<div class="hero-banner rounded-3 shadow-sm mb-4">
+    <h2 class="display-6 fw-bold mb-2"><i class="bi bi-code-slash me-2"></i>ACM校队管理系统</h2>
+    <p class="lead mb-0 opacity-75">编程竞赛一站式管理平台 · 刷题数据 · 比赛资讯 · 校内活动</p>
 </div>
+{% endif %}
 
 <div class="row g-3">
     <div class="col-md-6">
