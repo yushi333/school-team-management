@@ -151,13 +151,15 @@ def _save_avatar_bytes(data, ext):
 
 
 def _process_avatar_image(data, ext):
-    """Server-side avatar processing: center-crop to a square, resize to 256x256.
+    """Validate and normalize a client-cropped avatar to 512x512.
 
-    Returns (bytes, ext). Falls back to the original bytes when the image
-    can't be decoded (e.g. corrupted file) so the upload never hard-fails.
+    A center crop remains as a defensive fallback for non-square input.
+    Returns (bytes, ext), or raises ValueError for invalid image data.
     """
     try:
         from PIL import Image, ImageOps
+        img = Image.open(io.BytesIO(data))
+        img.verify()
         img = Image.open(io.BytesIO(data))
         img = ImageOps.exif_transpose(img)  # 纠正手机照片的 EXIF 旋转
         if img.mode not in ('RGB', 'RGBA'):
@@ -167,7 +169,7 @@ def _process_avatar_image(data, ext):
         left = (w - side) // 2
         top = (h - side) // 2
         img = img.crop((left, top, left + side, top + side))  # 居中裁成正方形
-        img = img.resize((256, 256), Image.LANCZOS)
+        img = img.resize((512, 512), Image.LANCZOS)
         out = io.BytesIO()
         if ext in ('jpg', 'jpeg'):
             if img.mode == 'RGBA':
@@ -177,8 +179,7 @@ def _process_avatar_image(data, ext):
         img.save(out, 'PNG')
         return out.getvalue(), 'png'
     except Exception as e:
-        print(f"[Avatar] server-side processing failed, keeping original: {e}")
-        return data, ext
+        raise ValueError('无法读取该图片，请重新选择有效的图片文件。') from e
 
 
 @main_bp.route('/profile/avatar', methods=['POST'])
@@ -196,7 +197,11 @@ def upload_avatar():
     if len(data) > 5 * 1024 * 1024:
         flash('头像文件不能超过 5MB。', 'danger')
         return redirect(url_for('main.profile'))
-    processed, save_ext = _process_avatar_image(data, ext)
+    try:
+        processed, save_ext = _process_avatar_image(data, ext)
+    except ValueError as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('main.profile'))
     _save_avatar_bytes(processed, save_ext)
     flash('头像已更新！', 'success')
     return redirect(url_for('main.profile'))
