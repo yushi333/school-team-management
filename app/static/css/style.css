@@ -445,68 +445,162 @@ footer {
 
 /* ---- Homepage banner ---- */
 .home-banner {
-    border-radius: 1rem;
-    background: #0f172a;
-}
-.home-banner .carousel-inner,
-.home-banner .carousel-item {
-    height: clamp(320px, 34vw, 470px);
-}
-.home-banner .carousel-item {
     position: relative;
+    border-radius: 1rem;
     overflow: hidden;
-    transition: transform .55s cubic-bezier(.22, .61, .36, 1);
+    background:
+        radial-gradient(ellipse at 50% 100%, rgba(79, 70, 229, .2), transparent 58%),
+        linear-gradient(180deg, #11102a 0%, #09081c 100%);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, .22);
 }
-.banner-backdrop {
+.coverflow-stage {
+    position: relative;
+    height: clamp(350px, 38vw, 520px);
+    perspective: 1500px;
+    transform-style: preserve-3d;
+}
+.coverflow-glow {
     position: absolute;
-    inset: -28px;
-    width: calc(100% + 56px);
-    height: calc(100% + 56px);
-    object-fit: cover;
-    filter: blur(24px) brightness(.58) saturate(1.15);
-    transform: scale(1.08);
+    left: 15%;
+    right: 15%;
+    bottom: -28%;
+    height: 42%;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, .22);
+    filter: blur(42px);
+}
+.coverflow-slide {
+    --slide-x: 0%;
+    --slide-scale: .45;
+    --slide-rotate: 0deg;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(64%, 840px);
+    height: calc(100% - 54px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: .2rem;
+    background: #080719;
+    opacity: 0;
+    filter: brightness(.45) saturate(.75);
+    transform: translate(-50%, -50%) translateX(var(--slide-x)) scale(var(--slide-scale)) rotateY(var(--slide-rotate));
+    transform-origin: center;
+    transform-style: preserve-3d;
+    transition:
+        transform .68s cubic-bezier(.22, .61, .36, 1),
+        opacity .5s ease,
+        filter .68s ease,
+        box-shadow .68s ease;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+.coverflow-slide.is-active {
+    --slide-scale: 1;
+    z-index: 4;
+    opacity: 1;
+    filter: none;
+    border-color: rgba(255,255,255,.9);
+    box-shadow: 0 22px 55px rgba(0,0,0,.48);
+    pointer-events: auto;
+}
+.coverflow-slide.is-active::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border: 1px solid rgba(255,255,255,.88);
+    pointer-events: none;
+}
+.coverflow-slide.is-prev {
+    --slide-x: -76%;
+    --slide-scale: .72;
+    --slide-rotate: 16deg;
+    z-index: 2;
+    opacity: .88;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.coverflow-slide.is-next {
+    --slide-x: 76%;
+    --slide-scale: .72;
+    --slide-rotate: -16deg;
+    z-index: 2;
+    opacity: .88;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.coverflow-slide.is-far-prev {
+    --slide-x: -118%;
+    --slide-scale: .52;
+    --slide-rotate: 24deg;
+    z-index: 1;
+    opacity: .2;
+}
+.coverflow-slide.is-far-next {
+    --slide-x: 118%;
+    --slide-scale: .52;
+    --slide-rotate: -24deg;
+    z-index: 1;
+    opacity: .2;
 }
 .banner-img {
-    position: relative;
-    z-index: 1;
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    transition: transform .65s cubic-bezier(.22, .61, .36, 1), opacity .4s ease;
 }
-.home-banner .carousel-item:not(.active) .banner-img {
-    transform: scale(.975);
-    opacity: .72;
-}
-.home-banner .carousel-control-prev,
-.home-banner .carousel-control-next { width: 9%; }
-.home-banner .carousel-control-prev-icon,
-.home-banner .carousel-control-next-icon {
-    width: 2.6rem;
-    height: 2.6rem;
-    background-size: 45%;
-    background-color: rgba(15, 23, 42, .58);
+.coverflow-control {
+    position: absolute;
+    top: 50%;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    padding: 0;
+    color: #fff;
+    font-size: 1.35rem;
+    background: rgba(15, 23, 42, .6);
     border: 1px solid rgba(255,255,255,.4);
     border-radius: 50%;
     backdrop-filter: blur(8px);
+    opacity: .78;
+    transform: translateY(-50%);
+    transition: opacity .25s ease, transform .25s ease, background-color .25s ease;
 }
-.home-banner .carousel-indicators {
-    z-index: 3;
+.coverflow-control:hover,
+.coverflow-control:focus-visible {
+    color: #fff;
+    background: rgba(79, 70, 229, .9);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.08);
+}
+.coverflow-prev { left: 1.2rem; }
+.coverflow-next { right: 1.2rem; }
+.coverflow-indicators {
+    position: absolute;
+    z-index: 8;
+    bottom: .8rem;
+    left: 50%;
+    display: flex;
     gap: .4rem;
-    margin-bottom: 1rem;
+    transform: translateX(-50%);
 }
-.home-banner .carousel-indicators [data-bs-target] {
+.coverflow-indicators button {
     width: 2.4rem;
     height: .25rem;
+    padding: 0;
     margin: 0;
     border: 0;
     border-radius: 999px;
     background-color: rgba(255,255,255,.6);
+    opacity: .68;
     transition: width .5s ease, background-color .3s ease;
 }
-.home-banner .carousel-indicators .active {
+.coverflow-indicators button.active {
     width: 4rem;
     background-color: #fff;
+    opacity: 1;
 }
 .hero-banner {
     background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%);
@@ -640,9 +734,18 @@ footer {
 }
 
 @media (max-width: 767.98px) {
-    .home-banner .carousel-inner,
-    .home-banner .carousel-item { height: clamp(210px, 58vw, 320px); }
-    .home-banner .carousel-control-prev-icon,
-    .home-banner .carousel-control-next-icon { width: 2.15rem; height: 2.15rem; }
-    .home-banner .carousel-indicators .active { width: 3rem; }
+    .coverflow-stage { height: clamp(250px, 68vw, 360px); }
+    .coverflow-slide { width: 78%; height: calc(100% - 48px); }
+    .coverflow-slide.is-prev { --slide-x: -72%; --slide-scale: .68; }
+    .coverflow-slide.is-next { --slide-x: 72%; --slide-scale: .68; }
+    .coverflow-control { width: 2.25rem; height: 2.25rem; font-size: 1rem; }
+    .coverflow-prev { left: .55rem; }
+    .coverflow-next { right: .55rem; }
+    .coverflow-indicators button.active { width: 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coverflow-slide,
+    .coverflow-control,
+    .coverflow-indicators button { transition-duration: .01ms; }
 }
